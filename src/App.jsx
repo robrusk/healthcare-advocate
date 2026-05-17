@@ -205,6 +205,10 @@ export default function InsuranceFighter() {
   const [step, setStep] = useState("upload");
   const [denialText, setDenialText] = useState("");
   const [denialReason, setDenialReason] = useState("");
+  const [submitterName, setSubmitterName] = useState("");
+  const [submitterRelationship, setSubmitterRelationship] = useState("patient");
+  const [submitterPhone, setSubmitterPhone] = useState("");
+  const [submitterEmail, setSubmitterEmail] = useState("");
   const [patientName, setPatientName] = useState("");
   const [claimNumber, setClaimNumber] = useState("");
   const [insurerName, setInsurerName] = useState("");
@@ -263,6 +267,17 @@ export default function InsuranceFighter() {
     const info = INSURANCE_KEYWORDS[denialReason];
     const reasonLabel = DENY_REASONS.find((r) => r.id === denialReason)?.label;
 
+    const isPatient = submitterRelationship === "patient";
+    const signerName = submitterName || "[YOUR NAME]";
+    const signerContact = [submitterPhone, submitterEmail].filter(Boolean).join(" | ") || "[YOUR PHONE / EMAIL]";
+    const relationshipLabel = {
+      patient: "the patient",
+      spouse: "the patient's spouse",
+      adult_child: "the patient's adult child",
+      family: "a family member of the patient",
+      advocate: "the patient's authorized advocate",
+    }[submitterRelationship] || "the patient's representative";
+
     const prompt = `You are an expert patient advocate and healthcare attorney. Generate a powerful, legally precise insurance appeal letter.
 
 Patient: ${patientName || "[PATIENT NAME]"}
@@ -270,16 +285,19 @@ Claim Number: ${claimNumber || "[CLAIM NUMBER]"}
 Insurance Company: ${insurerName || "[INSURANCE COMPANY]"}
 Treatment/Service: ${treatment || "[TREATMENT]"}
 Denial Reason: ${reasonLabel}
+Letter written by: ${signerName} (${relationshipLabel})
+Signer contact: ${signerContact}
 
 CRITICAL INSTRUCTIONS:
 1. Use these exact power keywords throughout: ${info.powerWords.slice(0, 6).join(", ")}
 2. Cite these laws specifically: ${info.laws.join(", ")}
 3. Be firm, professional, and legally precise
 4. Include: (a) formal heading, (b) summary of denial, (c) legal basis for appeal, (d) clinical/factual arguments, (e) list of enclosed documents, (f) deadline demand, (g) escalation warning
-5. Use language that insurance AI systems are trained to flag as requiring human review
-6. The tone should be assertive — this is a legal demand, not a polite request
-7. End with a clear 30-day response deadline and External Review threat
-8. Keep it under 600 words but make every sentence count
+5. ${isPatient ? "The letter is written in first person by the patient themselves." : `The letter is written by ${signerName}, who is ${relationshipLabel}. Open with a sentence identifying who is writing and their relationship to the patient.`}
+6. Close the letter with the signer's name (${signerName}) and contact info (${signerContact}). Include a signature line.
+7. The tone should be assertive — this is a legal demand, not a polite request
+8. End with a clear 30-day response deadline and External Review threat
+9. Keep it under 600 words but make every sentence count
 
 Write ONLY the letter. No explanations. Start with the date line.`;
 
@@ -317,6 +335,10 @@ Write ONLY the letter. No explanations. Start with the date line.`;
     setLetterDone(false);
     setPhotoSummary("");
     setPhotoReading(false);
+    setSubmitterName("");
+    setSubmitterRelationship("patient");
+    setSubmitterPhone("");
+    setSubmitterEmail("");
   };
 
   return (
@@ -381,6 +403,35 @@ Write ONLY the letter. No explanations. Start with the date line.`;
           <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
             <Card title="📋 Denial Details" subtitle="Tell us what happened">
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+                {/* Who is submitting this appeal */}
+                <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: "#00e5a0", fontFamily: "monospace", marginBottom: 12 }}>WHO IS SUBMITTING THIS APPEAL?</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                    {[
+                      { id: "patient", label: "The Patient" },
+                      { id: "spouse", label: "Spouse / Partner" },
+                      { id: "adult_child", label: "Adult Child" },
+                      { id: "family", label: "Other Family" },
+                      { id: "advocate", label: "Caregiver / Advocate" },
+                    ].map((r) => (
+                      <button key={r.id} onClick={() => setSubmitterRelationship(r.id)} style={{
+                        background: submitterRelationship === r.id ? "rgba(0,229,160,0.15)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${submitterRelationship === r.id ? "#00e5a0" : "rgba(255,255,255,0.1)"}`,
+                        borderRadius: 20, padding: "6px 14px", cursor: "pointer",
+                        color: submitterRelationship === r.id ? "#00e5a0" : "rgba(232,244,240,0.6)",
+                        fontSize: 13, fontFamily: "Georgia, serif", transition: "all 0.2s",
+                      }}>{r.label}</button>
+                    ))}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <Field label="Your Name" value={submitterName} onChange={setSubmitterName} placeholder="Jane Smith" />
+                    <Field label="Your Phone" value={submitterPhone} onChange={setSubmitterPhone} placeholder="(555) 000-0000" />
+                  </div>
+                  <div style={{ marginTop: 10 }}>
+                    <Field label="Your Email" value={submitterEmail} onChange={setSubmitterEmail} placeholder="jane@email.com" />
+                  </div>
+                </div>
 
                 {/* Camera + PDF buttons */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
