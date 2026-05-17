@@ -4,52 +4,52 @@ import userEvent from '@testing-library/user-event'
 import App from './App'
 
 vi.mock('./lib/claude', () => ({
-  analyzeDenialLetter: vi.fn().mockResolvedValue({
-    analysis: 'Your claim was denied.',
-    letter: 'Dear Insurance Company…',
+  analyzePhoto: vi.fn().mockResolvedValue({
+    plain_english: 'Your claim was denied.',
+    denial_reason: 'not_medically_necessary',
+    patient_name: 'Jane Smith',
+    claim_number: 'CLM-001',
+    insurer_name: 'Test Insurance',
+    treatment: 'MRI',
+  }),
+  analyzeDenial: vi.fn().mockResolvedValue({
+    plan_type: 'employer_erisa',
+    denial_reason: 'medical_necessity',
+    appeal_level: 'first_internal',
+    confidence: {},
   }),
   fileToBase64: vi.fn().mockResolvedValue('fakebase64'),
 }))
 
 describe('App', () => {
-  it('starts on the capture screen', () => {
+  it('renders the camera and PDF upload buttons', () => {
     render(<App />)
-    expect(screen.getByText(/photograph denial letter/i)).toBeInTheDocument()
+    expect(screen.getByText(/take photo/i)).toBeInTheDocument()
+    expect(screen.getByText(/upload pdf/i)).toBeInTheDocument()
   })
 
-  it('shows processing screen after a photo is selected', async () => {
-    const { analyzeDenialLetter } = await import('./lib/claude')
-    let resolveAnalysis
-    analyzeDenialLetter.mockImplementationOnce(
-      () => new Promise((resolve) => { resolveAnalysis = resolve })
-    )
-
+  it('renders the submitter relationship selector', () => {
     render(<App />)
-    const file = new File(['img'], 'denial.jpg', { type: 'image/jpeg' })
-    const input = document.querySelector('input[type="file"]')
-    await userEvent.upload(input, file)
-
-    expect(screen.getByText(/reading your denial letter/i)).toBeInTheDocument()
-    resolveAnalysis({ analysis: 'a', letter: 'b' })
+    expect(screen.getByText(/the patient/i)).toBeInTheDocument()
+    expect(screen.getByText(/spouse/i)).toBeInTheDocument()
   })
 
-  it('shows results screen after processing completes', async () => {
+  it('shows plain-English summary after photo upload', async () => {
     render(<App />)
     const file = new File(['img'], 'denial.jpg', { type: 'image/jpeg' })
     const input = document.querySelector('input[type="file"]')
     await userEvent.upload(input, file)
     await waitFor(() => {
-      expect(screen.getByText(/what this denial means/i)).toBeInTheDocument()
+      expect(screen.getByText(/your claim was denied/i)).toBeInTheDocument()
     })
   })
 
-  it('returns to capture screen when Start Over is clicked', async () => {
+  it('renders the analyze button when a denial reason is selected', async () => {
     render(<App />)
     const file = new File(['img'], 'denial.jpg', { type: 'image/jpeg' })
     const input = document.querySelector('input[type="file"]')
     await userEvent.upload(input, file)
-    await waitFor(() => screen.getByText(/start over/i))
-    await userEvent.click(screen.getByText(/start over/i))
-    expect(screen.getByText(/photograph denial letter/i)).toBeInTheDocument()
+    await waitFor(() => screen.getByText(/analyze my denial/i))
+    expect(screen.getByText(/analyze my denial/i)).toBeInTheDocument()
   })
 })

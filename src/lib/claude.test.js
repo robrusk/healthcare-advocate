@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { analyzeDenialLetter, fileToBase64 } from './claude'
+import { analyzeDenial, analyzePhoto, fileToBase64 } from './claude'
 
-// vi.hoisted runs before imports and before mock factories,
-// so mockCreate is available inside the vi.mock factory below.
 const { mockCreate } = vi.hoisted(() => ({ mockCreate: vi.fn() }))
 
 vi.mock('@anthropic-ai/sdk', () => ({
@@ -11,45 +9,78 @@ vi.mock('@anthropic-ai/sdk', () => ({
   }),
 }))
 
-describe('analyzeDenialLetter', () => {
+describe('analyzeDenial', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('returns analysis and letter from Claude response', async () => {
-    const fakeResponse = {
-      analysis: 'Your claim was denied because the insurer said it was not medically necessary.',
-      letter: 'Dear Insurance Company, I am writing to formally appeal...',
+  it('returns structured extraction from Claude response', async () => {
+    const fakeExtraction = {
+      insurer_name: 'Meridian Health Assurance',
+      plan_type: 'employer_erisa',
+      denial_reason: 'medical_necessity',
+      service_denied: 'Pembrolizumab infusion',
+      diagnosis_code: 'C34.31',
+      billed_amount: '$28,447.16',
+      appeal_deadline: '2026-10-11',
+      appeal_level: 'first_internal',
+      state: 'CT',
+      patient_name: 'Sample Patient',
+      claim_number: 'CLM-9938472-01',
+      confidence: { plan_type: 'medium', denial_reason: 'high', appeal_deadline: 'high', state: 'high' },
     }
-    mockCreate.mockResolvedValueOnce({
-      content: [{ text: JSON.stringify(fakeResponse) }],
-    })
+    mockCreate.mockResolvedValueOnce({ content: [{ text: JSON.stringify(fakeExtraction) }] })
 
-    const result = await analyzeDenialLetter('base64data', 'image/jpeg')
+    const result = await analyzeDenial('base64data', 'image/jpeg')
 
-    expect(result.analysis).toBe(fakeResponse.analysis)
-    expect(result.letter).toBe(fakeResponse.letter)
+    expect(result.insurer_name).toBe('Meridian Health Assurance')
+    expect(result.plan_type).toBe('employer_erisa')
+    expect(result.denial_reason).toBe('medical_necessity')
+    expect(result.appeal_deadline).toBe('2026-10-11')
+    expect(result.confidence.denial_reason).toBe('high')
   })
 
-  it('calls Claude with the correct model and image', async () => {
+  it('uses the Haiku model', async () => {
     mockCreate.mockResolvedValueOnce({
-      content: [{ text: JSON.stringify({ analysis: 'a', letter: 'b' }) }],
+      content: [{ text: JSON.stringify({ plan_type: 'employer_erisa', denial_reason: 'medical_necessity', appeal_level: 'first_internal', confidence: {} }) }],
     })
 
-    await analyzeDenialLetter('mybase64', 'image/jpeg')
+    await analyzeDenial('mybase64', 'image/jpeg')
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'claude-haiku-4-5-20251001' })
+    )
+  })
+
+  it('falls back plan_type to unclear when model returns invalid value', async () => {
+    mockCreate.mockResolvedValueOnce({
+      content: [{ text: JSON.stringify({ plan_type: 'made_up_value', denial_reason: 'medical_necessity', appeal_level: 'first_internal', confidence: {} }) }],
+    })
+
+    const result = await analyzeDenial('base64data', 'image/jpeg')
+    expect(result.plan_type).toBe('unclear')
+  })
+
+  it('falls back denial_reason to other when model returns invalid value', async () => {
+    mockCreate.mockResolvedValueOnce({
+      content: [{ text: JSON.stringify({ plan_type: 'employer_erisa', denial_reason: 'invented_reason', appeal_level: 'first_internal', confidence: {} }) }],
+    })
+
+    const result = await analyzeDenial('base64data', 'image/jpeg')
+    expect(result.denial_reason).toBe('other')
+  })
+
+  it('sends PDF as document type, not image', async () => {
+    mockCreate.mockResolvedValueOnce({
+      content: [{ text: JSON.stringify({ plan_type: 'employer_erisa', denial_reason: 'medical_necessity', appeal_level: 'first_internal', confidence: {} }) }],
+    })
+
+    await analyzeDenial('pdfbase64', 'application/pdf')
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'claude-opus-4-7',
         messages: expect.arrayContaining([
           expect.objectContaining({
             content: expect.arrayContaining([
-              expect.objectContaining({
-                type: 'image',
-                source: expect.objectContaining({
-                  type: 'base64',
-                  media_type: 'image/jpeg',
-                  data: 'mybase64',
-                }),
-              }),
+              expect.objectContaining({ type: 'document' }),
             ]),
           }),
         ]),
@@ -57,12 +88,9 @@ describe('analyzeDenialLetter', () => {
     )
   })
 
-  it('throws if Claude response is not valid JSON', async () => {
-    mockCreate.mockResolvedValueOnce({
-      content: [{ text: 'not json' }],
-    })
-
-    await expect(analyzeDenialLetter('base64data', 'image/jpeg')).rejects.toThrow()
+  it('throws if response is not valid JSON', async () => {
+    mockCreate.mockResolvedValueOnce({ content: [{ text: 'not json' }] })
+    await expect(analyzeDenial('base64data', 'image/jpeg')).rejects.toThrow()
   })
 })
 
