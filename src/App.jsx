@@ -379,7 +379,7 @@ Write ONLY the letter. No explanations. Start with the date line.`;
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
                 {/* Camera + PDF buttons */}
-                <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <label htmlFor="camera-input" style={{
                     flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     background: "linear-gradient(135deg, #00e5a0, #00b87a)",
@@ -398,6 +398,7 @@ Write ONLY the letter. No explanations. Start with the date line.`;
                     onChange={handlePhoto}
                     style={{ display: "none" }}
                   />
+                  <span style={{ color: "rgba(232,244,240,0.35)", fontSize: 13, fontFamily: "monospace", flexShrink: 0 }}>or</span>
                   <label htmlFor="pdf-input" style={{
                     flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     background: "rgba(255,255,255,0.05)",
