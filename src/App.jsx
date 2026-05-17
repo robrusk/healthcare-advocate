@@ -781,9 +781,10 @@ INSTRUCTIONS:
           </div>
         )}
 
-        <div style={{ textAlign: "center", marginTop: 40, fontSize: 11, color: "rgba(232,244,240,0.25)", fontFamily: "monospace", lineHeight: 1.8 }}>
-          CLAIM DEFENDER PRO — Not legal advice. Consult a healthcare attorney for complex cases.<br />
-          For urgent denials, contact your state's Insurance Commissioner immediately.
+        <HeavyHittersFooter />
+
+        <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "rgba(232,244,240,0.25)", fontFamily: "monospace", lineHeight: 1.8 }}>
+          CLAIM DEFENDER PRO — Not legal advice. Consult a healthcare attorney for complex cases.
         </div>
       </div>
 
@@ -807,6 +808,199 @@ INSTRUCTIONS:
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,229,160,0.3); border-radius: 2px; }
       `}</style>
+    </div>
+  );
+}
+
+const STATE_COMMISSIONERS = {
+  AL: { name: "Alabama", phone: "1-800-433-3966", url: "https://www.aldoi.gov" },
+  AK: { name: "Alaska", phone: "1-800-467-8725", url: "https://www.commerce.alaska.gov/web/ins" },
+  AZ: { name: "Arizona", phone: "1-800-325-2548", url: "https://insurance.az.gov" },
+  AR: { name: "Arkansas", phone: "1-800-282-9134", url: "https://www.insurance.arkansas.gov" },
+  CA: { name: "California", phone: "1-800-927-4357", url: "https://www.insurance.ca.gov" },
+  CO: { name: "Colorado", phone: "1-800-930-3745", url: "https://doi.colorado.gov" },
+  CT: { name: "Connecticut", phone: "1-800-203-3447", url: "https://portal.ct.gov/CID" },
+  DE: { name: "Delaware", phone: "1-800-282-8611", url: "https://insurance.delaware.gov" },
+  FL: { name: "Florida", phone: "1-877-693-5236", url: "https://www.myfloridacfo.com/division/consumers" },
+  GA: { name: "Georgia", phone: "1-800-656-2298", url: "https://oci.georgia.gov" },
+  HI: { name: "Hawaii", phone: "1-808-586-2790", url: "https://cca.hawaii.gov/ins" },
+  ID: { name: "Idaho", phone: "1-800-721-3272", url: "https://doi.idaho.gov" },
+  IL: { name: "Illinois", phone: "1-866-445-5364", url: "https://insurance.illinois.gov" },
+  IN: { name: "Indiana", phone: "1-800-622-4461", url: "https://www.in.gov/idoi" },
+  IA: { name: "Iowa", phone: "1-877-955-1212", url: "https://iid.iowa.gov" },
+  KS: { name: "Kansas", phone: "1-800-432-2484", url: "https://insurance.ks.gov" },
+  KY: { name: "Kentucky", phone: "1-800-595-6053", url: "https://insurance.ky.gov" },
+  LA: { name: "Louisiana", phone: "1-800-259-5301", url: "https://www.ldi.la.gov" },
+  ME: { name: "Maine", phone: "1-800-300-5000", url: "https://www.maine.gov/pfr/insurance" },
+  MD: { name: "Maryland", phone: "1-800-492-6116", url: "https://insurance.maryland.gov" },
+  MA: { name: "Massachusetts", phone: "1-877-563-4467", url: "https://www.mass.gov/orgs/division-of-insurance" },
+  MI: { name: "Michigan", phone: "1-877-999-6442", url: "https://www.michigan.gov/difs" },
+  MN: { name: "Minnesota", phone: "1-800-657-3602", url: "https://mn.gov/commerce/insurance" },
+  MS: { name: "Mississippi", phone: "1-800-562-2957", url: "https://www.mid.ms.gov" },
+  MO: { name: "Missouri", phone: "1-800-726-7390", url: "https://insurance.mo.gov" },
+  MT: { name: "Montana", phone: "1-800-332-6148", url: "https://csimt.gov" },
+  NE: { name: "Nebraska", phone: "1-877-564-7323", url: "https://doi.nebraska.gov" },
+  NV: { name: "Nevada", phone: "1-888-872-3234", url: "https://doi.nv.gov" },
+  NH: { name: "New Hampshire", phone: "1-800-852-3416", url: "https://www.nh.gov/insurance" },
+  NJ: { name: "New Jersey", phone: "1-800-446-7467", url: "https://www.state.nj.us/dobi" },
+  NM: { name: "New Mexico", phone: "1-855-427-5674", url: "https://www.osi.state.nm.us" },
+  NY: { name: "New York", phone: "1-800-342-3736", url: "https://www.dfs.ny.gov" },
+  NC: { name: "North Carolina", phone: "1-800-546-5664", url: "https://www.ncdoi.gov" },
+  ND: { name: "North Dakota", phone: "1-800-247-0560", url: "https://www.insurance.nd.gov" },
+  OH: { name: "Ohio", phone: "1-800-686-1526", url: "https://insurance.ohio.gov" },
+  OK: { name: "Oklahoma", phone: "1-800-522-0071", url: "https://www.oid.ok.gov" },
+  OR: { name: "Oregon", phone: "1-888-877-4894", url: "https://insurance.oregon.gov" },
+  PA: { name: "Pennsylvania", phone: "1-877-881-6388", url: "https://www.insurance.pa.gov" },
+  RI: { name: "Rhode Island", phone: "1-401-462-9520", url: "https://dbr.ri.gov/insurance" },
+  SC: { name: "South Carolina", phone: "1-800-768-3467", url: "https://doi.sc.gov" },
+  SD: { name: "South Dakota", phone: "1-605-773-3563", url: "https://dlr.sd.gov/insurance" },
+  TN: { name: "Tennessee", phone: "1-800-342-4029", url: "https://www.tn.gov/commerce/insurance" },
+  TX: { name: "Texas", phone: "1-800-252-3439", url: "https://www.tdi.texas.gov" },
+  UT: { name: "Utah", phone: "1-800-439-3805", url: "https://insurance.utah.gov" },
+  VT: { name: "Vermont", phone: "1-800-964-1784", url: "https://dfr.vermont.gov/insurance" },
+  VA: { name: "Virginia", phone: "1-877-310-6560", url: "https://www.scc.virginia.gov/pages/Bureau-of-Insurance" },
+  WA: { name: "Washington", phone: "1-800-562-6900", url: "https://www.insurance.wa.gov" },
+  WV: { name: "West Virginia", phone: "1-888-879-9842", url: "https://www.wvinsurance.gov" },
+  WI: { name: "Wisconsin", phone: "1-800-236-8517", url: "https://oci.wi.gov" },
+  WY: { name: "Wyoming", phone: "1-800-438-5768", url: "https://insurance.wyo.gov" },
+  DC: { name: "Washington DC", phone: "1-202-727-8000", url: "https://disb.dc.gov" },
+};
+
+function HeavyHittersFooter() {
+  const [open, setOpen] = useState(false);
+  const [selectedState, setSelectedState] = useState("");
+  const [zip, setZip] = useState("");
+  const [rep, setRep] = useState(null);
+  const [repLoading, setRepLoading] = useState(false);
+  const [repError, setRepError] = useState("");
+
+  const commissioner = selectedState ? STATE_COMMISSIONERS[selectedState] : null;
+
+  const lookupRep = async () => {
+    if (zip.length !== 5) return;
+    setRepLoading(true);
+    setRep(null);
+    setRepError("");
+    try {
+      const res = await fetch(`https://whoismyrepresentative.com/getall_mems.php?zip=${zip}&output=json`);
+      const data = await res.json();
+      const results = data.results || [];
+      setRep(results.length > 0 ? results : null);
+      if (results.length === 0) setRepError("No representatives found for that ZIP code.");
+    } catch {
+      setRepError("Lookup failed. Try zip.house.gov to find your representative.");
+    }
+    setRepLoading(false);
+  };
+
+  return (
+    <div style={{ marginTop: 32, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: "100%", background: "rgba(255,60,60,0.08)", border: "1px solid rgba(255,60,60,0.25)",
+          borderRadius: 12, padding: "14px 20px", cursor: "pointer", color: "#ff6060",
+          fontSize: 15, fontWeight: 700, fontFamily: "Georgia, serif",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+        }}
+      >
+        🚨 Call In The Heavy Hitters {open ? "▲" : "▼"}
+      </button>
+      <p style={{ textAlign: "center", fontSize: 11, color: "rgba(232,244,240,0.3)", fontFamily: "monospace", marginTop: 6 }}>
+        State Insurance Commissioner · Your Congressional Representative
+      </p>
+
+      {open && (
+        <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 16 }}>
+
+          {/* State Commissioner */}
+          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px" }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 10 }}>⚖️ STATE INSURANCE COMMISSIONER</div>
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              style={{
+                width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 8, padding: "10px 12px", color: "#e8f4f0", fontSize: 14,
+                fontFamily: "Georgia, serif", outline: "none", marginBottom: 12,
+              }}
+            >
+              <option value="">Select your state...</option>
+              {Object.entries(STATE_COMMISSIONERS).map(([code, s]) => (
+                <option key={code} value={code}>{s.name}</option>
+              ))}
+            </select>
+            {commissioner && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <a href={`tel:${commissioner.phone.replace(/[^0-9+]/g, "")}`} style={{
+                  display: "flex", alignItems: "center", gap: 10, background: "rgba(0,229,160,0.1)",
+                  border: "1px solid rgba(0,229,160,0.3)", borderRadius: 8, padding: "12px 16px",
+                  color: "#00e5a0", textDecoration: "none", fontSize: 15, fontWeight: 700, fontFamily: "monospace",
+                }}>
+                  📞 {commissioner.phone}
+                </a>
+                <a href={commissioner.url} target="_blank" rel="noreferrer" style={{
+                  display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "10px 16px",
+                  color: "rgba(232,244,240,0.6)", textDecoration: "none", fontSize: 13, fontFamily: "monospace",
+                }}>
+                  🌐 File a formal complaint online →
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Congressional Rep */}
+          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px" }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 10 }}>🏛 YOUR CONGRESSIONAL REPRESENTATIVE</div>
+            <p style={{ fontSize: 12, color: "rgba(232,244,240,0.5)", fontFamily: "monospace", marginBottom: 10, lineHeight: 1.5 }}>
+              A call from your Rep's constituent services office moves insurance companies faster than almost anything else.
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                value={zip}
+                onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                placeholder="Enter ZIP code"
+                style={{
+                  flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: 8, padding: "10px 12px", color: "#e8f4f0", fontSize: 14,
+                  fontFamily: "Georgia, serif", outline: "none",
+                }}
+              />
+              <button
+                onClick={lookupRep}
+                disabled={zip.length !== 5 || repLoading}
+                style={{
+                  background: zip.length === 5 ? "rgba(0,229,160,0.15)" : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${zip.length === 5 ? "#00e5a0" : "rgba(255,255,255,0.1)"}`,
+                  borderRadius: 8, padding: "10px 16px", cursor: zip.length === 5 ? "pointer" : "not-allowed",
+                  color: zip.length === 5 ? "#00e5a0" : "rgba(255,255,255,0.3)",
+                  fontSize: 13, fontFamily: "Georgia, serif",
+                }}
+              >
+                {repLoading ? "..." : "Look Up"}
+              </button>
+            </div>
+            {repError && <p style={{ fontSize: 12, color: "#ff6060", fontFamily: "monospace", marginTop: 8 }}>{repError}</p>}
+            {rep && (
+              <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                {rep.map((r, i) => (
+                  <a key={i} href={r.link} target="_blank" rel="noreferrer" style={{
+                    display: "flex", flexDirection: "column", gap: 2,
+                    background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)",
+                    borderRadius: 8, padding: "12px 14px", textDecoration: "none",
+                  }}>
+                    <span style={{ color: "#ffd700", fontWeight: 700, fontSize: 14, fontFamily: "Georgia, serif" }}>{r.name}</span>
+                    <span style={{ color: "rgba(232,244,240,0.5)", fontSize: 12, fontFamily: "monospace" }}>{r.district} · {r.phone}</span>
+                    <span style={{ color: "rgba(232,244,240,0.35)", fontSize: 11, fontFamily: "monospace" }}>Tap to visit office website →</span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
     </div>
   );
 }
