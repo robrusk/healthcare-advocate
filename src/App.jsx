@@ -217,7 +217,8 @@ export default function InsuranceFighter() {
   const [photoSummary, setPhotoSummary] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
-  const [appealLetter, setAppealLetter] = useState("");
+  const [letters, setLetters] = useState({ insurance: "", hospital: "", doctor: "" });
+  const [activeTab, setActiveTab] = useState("insurance");
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [letterDone, setLetterDone] = useState(false);
@@ -264,6 +265,7 @@ export default function InsuranceFighter() {
     setGenerating(true);
     setStep("letter");
     setLetterDone(false);
+    setActiveTab("insurance");
     const info = INSURANCE_KEYWORDS[denialReason];
     const reasonLabel = DENY_REASONS.find((r) => r.id === denialReason)?.label;
 
@@ -278,45 +280,88 @@ export default function InsuranceFighter() {
       advocate: "the patient's authorized advocate",
     }[submitterRelationship] || "the patient's representative";
 
-    const prompt = `You are an expert patient advocate and healthcare attorney. Generate a powerful, legally precise insurance appeal letter.
+    const signerLine = isPatient
+      ? "The letter is written in first person by the patient themselves."
+      : `The letter is written by ${signerName}, who is ${relationshipLabel}. Open with a sentence identifying who is writing and their relationship to the patient.`;
 
-Patient: ${patientName || "[PATIENT NAME]"}
+    const closing = `Close with the signer's name (${signerName}) and contact info (${signerContact}). Include a signature line.`;
+
+    const context = `Patient: ${patientName || "[PATIENT NAME]"}
 Claim Number: ${claimNumber || "[CLAIM NUMBER]"}
 Insurance Company: ${insurerName || "[INSURANCE COMPANY]"}
 Treatment/Service: ${treatment || "[TREATMENT]"}
 Denial Reason: ${reasonLabel}
-Letter written by: ${signerName} (${relationshipLabel})
-Signer contact: ${signerContact}
+Written by: ${signerName} (${relationshipLabel})`;
 
-CRITICAL INSTRUCTIONS:
+    const insurancePrompt = `You are an expert patient advocate and healthcare attorney. Generate a powerful, legally precise insurance appeal letter.
+
+${context}
+
+INSTRUCTIONS:
 1. Use these exact power keywords throughout: ${info.powerWords.slice(0, 6).join(", ")}
 2. Cite these laws specifically: ${info.laws.join(", ")}
-3. Be firm, professional, and legally precise
-4. Include: (a) formal heading, (b) summary of denial, (c) legal basis for appeal, (d) clinical/factual arguments, (e) list of enclosed documents, (f) deadline demand, (g) escalation warning
-5. ${isPatient ? "The letter is written in first person by the patient themselves." : `The letter is written by ${signerName}, who is ${relationshipLabel}. Open with a sentence identifying who is writing and their relationship to the patient.`}
-6. Close the letter with the signer's name (${signerName}) and contact info (${signerContact}). Include a signature line.
-7. The tone should be assertive — this is a legal demand, not a polite request
-8. End with a clear 30-day response deadline and External Review threat
-9. Keep it under 600 words but make every sentence count
+3. Include: formal heading, summary of denial, legal basis, clinical arguments, list of enclosed documents, deadline demand, escalation warning
+4. ${signerLine}
+5. ${closing}
+6. Assertive tone — this is a legal demand, not a polite request
+7. End with a 30-day response deadline and External Review threat
+8. Under 600 words. Start with the date line. Write ONLY the letter.`;
 
-Write ONLY the letter. No explanations. Start with the date line.`;
+    const hospitalPrompt = `You are a patient advocate. Write a firm, professional letter to the hospital on behalf of a patient whose insurance claim was denied.
+
+${context}
+
+PURPOSE: Request the hospital's patient advocacy department to:
+1. Provide a complete itemized bill and all medical records related to this claim
+2. Place a hold on any collections activity while the insurance appeal is pending
+3. Connect the patient with the hospital's financial assistance and patient advocate programs
+4. Cooperate fully with the insurance appeal process
+
+INSTRUCTIONS:
+- ${signerLine}
+- ${closing}
+- Professional but assertive tone
+- Under 400 words. Start with the date line. Write ONLY the letter.`;
+
+    const doctorPrompt = `You are a patient advocate. Write a letter to the treating physician asking them to support an insurance appeal.
+
+${context}
+
+PURPOSE: Ask the doctor to:
+1. Write a Letter of Medical Necessity using specific clinical language
+2. Use these exact keywords that will trigger human review: ${info.powerWords.slice(0, 4).join(", ")}
+3. Reference the specific denial reason (${reasonLabel}) and directly counter it
+4. Request a peer-to-peer review call with the insurance company's Medical Director
+5. Provide any additional clinical documentation that supports the appeal
+
+INSTRUCTIONS:
+- ${signerLine}
+- ${closing}
+- Respectful, collegial tone — this is a request, not a demand
+- Under 400 words. Start with the date line. Write ONLY the letter.`;
+
+    const call = (prompt) => client.messages.create({
+      model: "claude-opus-4-7",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }],
+    }).then((r) => r.content.find((b) => b.type === "text")?.text || "");
 
     try {
-      const response = await client.messages.create({
-        model: "claude-opus-4-7",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }],
-      });
-      const text = response.content.find((b) => b.type === "text")?.text || "";
-      setAppealLetter(text);
+      const [insurance, hospital, doctor] = await Promise.all([
+        call(insurancePrompt),
+        call(hospitalPrompt),
+        call(doctorPrompt),
+      ]);
+      setLetters({ insurance, hospital, doctor });
     } catch (e) {
-      setAppealLetter("Error generating letter. Please try again.");
+      const err = "Error generating letter. Please try again.";
+      setLetters({ insurance: err, hospital: err, doctor: err });
     }
     setGenerating(false);
   };
 
   const copyLetter = () => {
-    navigator.clipboard.writeText(appealLetter);
+    navigator.clipboard.writeText(letters[activeTab] || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -330,7 +375,8 @@ Write ONLY the letter. No explanations. Start with the date line.`;
     setInsurerName("");
     setTreatment("");
     setAnalysisResult(null);
-    setAppealLetter("");
+    setLetters({ insurance: "", hospital: "", doctor: "" });
+    setActiveTab("insurance");
     setGenerating(false);
     setLetterDone(false);
     setPhotoSummary("");
@@ -649,51 +695,70 @@ Write ONLY the letter. No explanations. Start with the date line.`;
 
         {step === "letter" && (
           <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
-            <Card title="✉️ Your Appeal Letter" subtitle="Ready to send — legally precise, AI-optimized">
+            <Card title="✉️ Your Letters" subtitle="Three letters ready to send — tap a tab to switch">
               {generating && (
                 <div style={{ textAlign: "center", padding: "32px 0" }}>
                   <div style={{ fontSize: 40, marginBottom: 16 }}>✍️</div>
-                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>Writing your appeal letter...</p>
-                  <p style={{ fontFamily: "monospace", color: "rgba(232,244,240,0.4)", fontSize: 12 }}>Inserting legal language and counter-AI keywords</p>
+                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>Writing all three letters at once...</p>
+                  <p style={{ fontFamily: "monospace", color: "rgba(232,244,240,0.4)", fontSize: 12 }}>Insurance appeal · Hospital · Doctor</p>
                 </div>
               )}
 
-              {!generating && appealLetter && (
+              {!generating && letters.insurance && (
                 <>
+                  {/* Tabs */}
+                  <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+                    {[
+                      { id: "insurance", label: "🏛 Insurance Appeal" },
+                      { id: "hospital", label: "🏥 Hospital" },
+                      { id: "doctor", label: "👨‍⚕️ Doctor" },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => { setActiveTab(tab.id); setLetterDone(false); }}
+                        style={{
+                          flex: 1, padding: "10px 6px", cursor: "pointer", fontSize: 12,
+                          fontFamily: "Georgia, serif", borderRadius: 8, transition: "all 0.2s",
+                          background: activeTab === tab.id ? "rgba(0,229,160,0.15)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${activeTab === tab.id ? "#00e5a0" : "rgba(255,255,255,0.1)"}`,
+                          color: activeTab === tab.id ? "#00e5a0" : "rgba(232,244,240,0.5)",
+                          fontWeight: activeTab === tab.id ? 700 : 400,
+                        }}
+                      >{tab.label}</button>
+                    ))}
+                  </div>
+
+                  {/* Letter body */}
                   <div style={{
                     background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: 10, padding: 20, marginBottom: 16, maxHeight: 500, overflowY: "auto",
                   }}>
                     <pre style={{ fontFamily: "Georgia, serif", fontSize: 13, lineHeight: 1.7, color: "rgba(232,244,240,0.9)", whiteSpace: "pre-wrap", margin: 0 }}>
-                      {letterDone ? appealLetter : <TypewriterText text={appealLetter} speed={8} onDone={() => setLetterDone(true)} />}
+                      {letterDone
+                        ? letters[activeTab]
+                        : <TypewriterText key={activeTab} text={letters[activeTab]} speed={8} onDone={() => setLetterDone(true)} />}
                     </pre>
                   </div>
 
                   <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                    <button
-                      onClick={copyLetter}
-                      style={{
-                        flex: 1, background: copied ? "rgba(0,229,160,0.2)" : "rgba(0,229,160,0.1)",
-                        border: "1px solid #00e5a0", borderRadius: 8, padding: "12px 16px", cursor: "pointer",
-                        color: "#00e5a0", fontSize: 14, fontFamily: "Georgia, serif", transition: "all 0.2s",
-                      }}
-                    >
+                    <button onClick={copyLetter} style={{
+                      flex: 1, background: copied ? "rgba(0,229,160,0.2)" : "rgba(0,229,160,0.1)",
+                      border: "1px solid #00e5a0", borderRadius: 8, padding: "12px 16px", cursor: "pointer",
+                      color: "#00e5a0", fontSize: 14, fontFamily: "Georgia, serif", transition: "all 0.2s",
+                    }}>
                       {copied ? "✓ Copied!" : "📋 Copy Letter"}
                     </button>
-                    <button
-                      onClick={generateLetter}
-                      style={{
-                        flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
-                        borderRadius: 8, padding: "12px 16px", cursor: "pointer", color: "rgba(232,244,240,0.6)",
-                        fontSize: 14, fontFamily: "Georgia, serif",
-                      }}
-                    >
-                      🔄 Regenerate
+                    <button onClick={generateLetter} style={{
+                      flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
+                      borderRadius: 8, padding: "12px 16px", cursor: "pointer", color: "rgba(232,244,240,0.6)",
+                      fontSize: 14, fontFamily: "Georgia, serif",
+                    }}>
+                      🔄 Regenerate All
                     </button>
                   </div>
 
                   <div style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 10, padding: 14 }}>
-                    <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 8 }}>⚠️ AFTER SENDING YOUR LETTER</div>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 8 }}>⚠️ AFTER SENDING YOUR LETTERS</div>
                     <div style={{ fontSize: 12, lineHeight: 1.6, color: "rgba(232,244,240,0.7)", fontFamily: "monospace" }}>
                       1. Send via certified mail AND fax — create a paper trail<br />
                       2. Note the date — insurers have strict response deadlines<br />
@@ -705,14 +770,11 @@ Write ONLY the letter. No explanations. Start with the date line.`;
                 </>
               )}
 
-              <button
-                onClick={reset}
-                style={{
-                  width: "100%", marginTop: 16, background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 8, padding: "12px", cursor: "pointer", color: "rgba(232,244,240,0.4)",
-                  fontSize: 13, fontFamily: "Georgia, serif",
-                }}
-              >
+              <button onClick={reset} style={{
+                width: "100%", marginTop: 16, background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 8, padding: "12px", cursor: "pointer", color: "rgba(232,244,240,0.4)",
+                fontSize: 13, fontFamily: "Georgia, serif",
+              }}>
                 ← Start New Appeal
               </button>
             </Card>
