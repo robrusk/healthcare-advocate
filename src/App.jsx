@@ -378,17 +378,17 @@ Write ONLY the letter. No explanations. Start with the date line.`;
             <Card title="📋 Denial Details" subtitle="Tell us what happened">
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-                {/* Camera button */}
-                <div style={{ textAlign: "center" }}>
+                {/* Camera + PDF buttons */}
+                <div style={{ display: "flex", gap: 10 }}>
                   <label htmlFor="camera-input" style={{
-                    display: "inline-flex", alignItems: "center", gap: 10,
+                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     background: "linear-gradient(135deg, #00e5a0, #00b87a)",
-                    color: "#0a0e1a", fontWeight: 700, fontSize: 15,
-                    fontFamily: "Georgia, serif", padding: "14px 28px",
+                    color: "#0a0e1a", fontWeight: 700, fontSize: 14,
+                    fontFamily: "Georgia, serif", padding: "14px 16px",
                     borderRadius: 12, cursor: "pointer",
                     boxShadow: "0 0 30px rgba(0,229,160,0.3)",
                   }}>
-                    📷 Photograph Denial Letter
+                    📷 Take Photo
                   </label>
                   <input
                     id="camera-input"
@@ -398,10 +398,27 @@ Write ONLY the letter. No explanations. Start with the date line.`;
                     onChange={handlePhoto}
                     style={{ display: "none" }}
                   />
-                  <p style={{ marginTop: 8, fontSize: 11, color: "rgba(232,244,240,0.35)", fontFamily: "monospace" }}>
-                    On your phone? Open this page in your phone's browser and tap above to use your camera.
-                  </p>
+                  <label htmlFor="pdf-input" style={{
+                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "rgba(232,244,240,0.8)", fontWeight: 700, fontSize: 14,
+                    fontFamily: "Georgia, serif", padding: "14px 16px",
+                    borderRadius: 12, cursor: "pointer",
+                  }}>
+                    📄 Upload PDF
+                  </label>
+                  <input
+                    id="pdf-input"
+                    type="file"
+                    accept=".pdf,image/*"
+                    onChange={handlePhoto}
+                    style={{ display: "none" }}
+                  />
                 </div>
+                <p style={{ marginTop: -8, fontSize: 11, color: "rgba(232,244,240,0.35)", fontFamily: "monospace", textAlign: "center" }}>
+                  On your phone? Open this page in your phone's browser to use your camera.
+                </p>
 
                 {/* Reading state */}
                 {photoReading && (

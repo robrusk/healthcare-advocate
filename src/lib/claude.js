@@ -45,19 +45,19 @@ Analyze this denial letter and respond with a JSON object containing exactly two
 Respond with ONLY the JSON object. No other text before or after it.`
 
 export async function analyzePhoto(imageBase64, mediaType) {
+  const isPdf = mediaType === 'application/pdf'
+
+  const fileContent = isPdf
+    ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: imageBase64 } }
+    : { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } }
+
   const response = await client.messages.create({
     model: 'claude-opus-4-7',
     max_tokens: 1024,
     messages: [
       {
         role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: { type: 'base64', media_type: mediaType, data: imageBase64 },
-          },
-          { type: 'text', text: PHOTO_PROMPT },
-        ],
+        content: [fileContent, { type: 'text', text: PHOTO_PROMPT }],
       },
     ],
   })
