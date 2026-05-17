@@ -5,6 +5,9 @@ import { analyzePhoto, fileToBase64 } from "./lib/claude";
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
   dangerouslyAllowBrowser: true,
+  defaultHeaders: {
+    'anthropic-beta': 'pdfs-2024-09-25',
+  },
 });
 
 const DENY_REASONS = [
@@ -236,8 +239,9 @@ export default function InsuranceFighter() {
       if (result.claim_number) setClaimNumber(result.claim_number);
       if (result.insurer_name) setInsurerName(result.insurer_name);
       if (result.treatment) setTreatment(result.treatment);
-    } catch {
-      setPhotoSummary("Couldn't read the letter clearly — please fill in the fields below manually.");
+    } catch (err) {
+      console.error("Photo analysis error:", err);
+      setPhotoSummary(`Error reading letter: ${err?.message || err}. Please fill in the fields below manually.`);
     }
     setPhotoReading(false);
   };
