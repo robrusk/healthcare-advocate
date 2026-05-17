@@ -18,11 +18,19 @@ describe('App', () => {
   })
 
   it('shows processing screen after a photo is selected', async () => {
+    const { analyzeDenialLetter } = await import('./lib/claude')
+    let resolveAnalysis
+    analyzeDenialLetter.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveAnalysis = resolve })
+    )
+
     render(<App />)
     const file = new File(['img'], 'denial.jpg', { type: 'image/jpeg' })
     const input = document.querySelector('input[type="file"]')
     await userEvent.upload(input, file)
+
     expect(screen.getByText(/reading your denial letter/i)).toBeInTheDocument()
+    resolveAnalysis({ analysis: 'a', letter: 'b' })
   })
 
   it('shows results screen after processing completes', async () => {
