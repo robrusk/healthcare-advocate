@@ -4,6 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/PatientAdvocate/',
+  build: {
+    cssMinify: 'esbuild',
+  },
   plugins: [
     react(),
     VitePWA({

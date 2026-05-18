@@ -4,6 +4,7 @@ import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
 import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
 import { lookupVerifiedFacts } from "./library/index";
 import { FactsUsedCard } from "./components/FactsUsedCard";
+import { downloadAppealReminder } from "./lib/calendar";
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -931,6 +932,29 @@ INSTRUCTIONS:
                       🔄 Regenerate All
                     </button>
                   </div>
+
+                  {confirmedExtraction?.appeal_deadline && (
+                    <button
+                      onClick={() => downloadAppealReminder({
+                        deadline: confirmedExtraction.appeal_deadline,
+                        insurerName: confirmedExtraction.insurer_name || insurerName,
+                        claimNumber: confirmedExtraction.claim_number || claimNumber,
+                        denialReason: DENIAL_REASON_LABELS[confirmedExtraction.denial_reason] || "",
+                      })}
+                      style={{
+                        width: "100%", marginBottom: 12,
+                        background: "rgba(0,229,160,0.1)", border: "1px solid rgba(0,229,160,0.35)",
+                        borderRadius: 10, padding: "14px 16px", cursor: "pointer",
+                        color: "#00e5a0", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                      }}
+                    >
+                      📅 Add Appeal Deadline to Calendar
+                      <span style={{ fontSize: 12, fontWeight: 400, opacity: 0.7 }}>
+                        ({confirmedExtraction.appeal_deadline})
+                      </span>
+                    </button>
+                  )}
 
                   <div style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 10, padding: 14 }}>
                     <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 8 }}>⚠️ AFTER SENDING YOUR LETTERS</div>

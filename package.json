@@ -24,12 +24,15 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "esbuild": "^0.28.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
+    "lightningcss": "^1.32.0",
     "vite": "^8.0.12",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.6"
   }
 }
