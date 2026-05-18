@@ -1031,16 +1031,7 @@ const STATE_COMMISSIONERS = {
 function HeavyHittersFooter() {
   const [open, setOpen] = useState(false);
   const [selectedState, setSelectedState] = useState("");
-  const [zip, setZip] = useState("");
-  const [zipReady, setZipReady] = useState(false);
-
   const commissioner = selectedState ? STATE_COMMISSIONERS[selectedState] : null;
-
-  const handleZip = (e) => {
-    const val = e.target.value.replace(/\D/g, "").slice(0, 5);
-    setZip(val);
-    setZipReady(val.length === 5);
-  };
 
   return (
     <div style={{ marginTop: 32, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20 }}>
@@ -1105,47 +1096,35 @@ function HeavyHittersFooter() {
             <p style={{ fontSize: 12, color: "rgba(232,244,240,0.5)", fontFamily: "monospace", marginBottom: 12, lineHeight: 1.5 }}>
               A call from your Rep's constituent services office moves insurance companies faster than almost anything else. Enter your ZIP to find yours.
             </p>
-            <input
-              value={zip}
-              onChange={handleZip}
-              placeholder="Enter ZIP code"
-              style={{
-                width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 8, padding: "10px 12px", color: "#e8f4f0", fontSize: 14,
-                fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box", marginBottom: 10,
-              }}
-            />
-            {zipReady && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <a
-                  href={`https://www.house.gov/representatives/find-your-representative?Zip=${zip}`}
-                  target="_blank" rel="noreferrer"
-                  style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.3)",
-                    borderRadius: 8, padding: "12px 16px", textDecoration: "none",
-                    color: "#ffd700", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
-                  }}
-                >
-                  🏛 Find My House Representative →
-                </a>
-                <a
-                  href="https://www.senate.gov/senators/senators-contact.htm"
-                  target="_blank" rel="noreferrer"
-                  style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)",
-                    borderRadius: 8, padding: "12px 16px", textDecoration: "none",
-                    color: "rgba(255,215,0,0.7)", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
-                  }}
-                >
-                  🏛 Find My US Senators →
-                </a>
-                <p style={{ fontSize: 11, color: "rgba(232,244,240,0.3)", fontFamily: "monospace", margin: 0 }}>
-                  These links open the official government websites. Ask for constituent services and explain the insurance denial.
-                </p>
-              </div>
-            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <a
+                href="https://www.house.gov/representatives/find-your-representative"
+                target="_blank" rel="noreferrer"
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.3)",
+                  borderRadius: 8, padding: "12px 16px", textDecoration: "none",
+                  color: "#ffd700", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
+                }}
+              >
+                🏛 Find My House Representative →
+              </a>
+              <a
+                href="https://www.senate.gov/senators/senators-contact.htm"
+                target="_blank" rel="noreferrer"
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)",
+                  borderRadius: 8, padding: "12px 16px", textDecoration: "none",
+                  color: "rgba(255,215,0,0.7)", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
+                }}
+              >
+                🏛 Find My US Senators →
+              </a>
+              <p style={{ fontSize: 11, color: "rgba(232,244,240,0.3)", fontFamily: "monospace", margin: 0 }}>
+                Ask for constituent services and explain the insurance denial.
+              </p>
+            </div>
           </div>
 
         </div>
