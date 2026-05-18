@@ -504,7 +504,7 @@ INSTRUCTIONS:
 
         <div style={{ textAlign: "center", padding: "32px 0 24px", opacity: animateIn ? 1 : 0, transform: animateIn ? "none" : "translateY(-20px)", transition: "all 0.8s ease" }}>
           <div style={{ fontSize: 13, letterSpacing: 4, color: "#00e5a0", textTransform: "uppercase", marginBottom: 12, fontFamily: "monospace" }}>
-            ⚔ CLAIM DEFENDER PRO
+            🛡️ healthcareadvocate.org
           </div>
           <h1 style={{ fontSize: 32, fontWeight: 900, margin: "0 0 8px", lineHeight: 1.15, letterSpacing: -1 }}>
             Fight Your{" "}
@@ -513,7 +513,7 @@ INSTRUCTIONS:
             <span style={{ color: "#00e5a0" }}>Claim.</span>
           </h1>
           <p style={{ color: "rgba(232,244,240,0.55)", fontSize: 14, margin: 0, fontFamily: "monospace", letterSpacing: 1 }}>
-            AI-powered appeals that beat insurance AI
+            Free · Private · On Your Side
           </p>
         </div>
 
@@ -986,7 +986,7 @@ INSTRUCTIONS:
         <HeavyHittersFooter />
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "rgba(232,244,240,0.25)", fontFamily: "monospace", lineHeight: 1.8 }}>
-          CLAIM DEFENDER PRO — Not legal advice. Consult a healthcare attorney for complex cases.
+          healthcareadvocate.org — Not legal advice. Consult a healthcare attorney for complex cases.
         </div>
       </div>
 
