@@ -245,6 +245,7 @@ export default function InsuranceFighter() {
   const [photoReading, setPhotoReading] = useState(false);
   const [photoSummary, setPhotoSummary] = useState("");
   const [denialExtraction, setDenialExtraction] = useState(null);
+  const [confirmedExtraction, setConfirmedExtraction] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [letters, setLetters] = useState({ insurance: "", hospital: "", doctor: "" });
@@ -296,6 +297,7 @@ export default function InsuranceFighter() {
     ]);
 
     setDenialExtraction(extraction);
+    setConfirmedExtraction(extraction ? { ...extraction } : null);
     setAnalysisResult(INSURANCE_KEYWORDS[denialReason]);
     setAnalyzing(false);
     setTimeout(() => setStep("strategy"), 400);
@@ -424,6 +426,7 @@ INSTRUCTIONS:
     setPhotoBase64(null);
     setPhotoMediaType(null);
     setDenialExtraction(null);
+    setConfirmedExtraction(null);
     setSubmitterName("");
     setSubmitterRelationship("patient");
     setSubmitterPhone("");
@@ -668,40 +671,84 @@ INSTRUCTIONS:
         {step === "strategy" && analysisResult && (
           <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
 
-            {/* Confirmation card — shown when we have extraction data */}
-            {denialExtraction && (
-              <Card title="📋 What We Found" subtitle="Review before we draft your letters — correct anything that looks wrong">
-                {[
-                  { icon: "🏢", label: "Insurer", value: denialExtraction.insurer_name || insurerName || null, conf: "high" },
-                  { icon: "🏥", label: "Plan Type", value: PLAN_TYPE_LABELS[denialExtraction.plan_type], conf: denialExtraction.confidence?.plan_type || "low" },
-                  { icon: "⚖️", label: "Denial Reason", value: DENIAL_REASON_LABELS[denialExtraction.denial_reason], conf: denialExtraction.confidence?.denial_reason || "low" },
-                  { icon: "💊", label: "Service Denied", value: denialExtraction.service_denied || treatment || null, conf: "high" },
-                  { icon: "📅", label: "Appeal Deadline", value: denialExtraction.appeal_deadline || null, conf: denialExtraction.confidence?.appeal_deadline || "low" },
-                  { icon: "🎯", label: "Appeal Level", value: APPEAL_LEVEL_LABELS[denialExtraction.appeal_level], conf: "high" },
-                  { icon: "📍", label: "State", value: denialExtraction.state || null, conf: denialExtraction.confidence?.state || "low" },
-                ].map(({ icon, label, value, conf }) => {
-                  const isLow = conf === "low";
-                  return (
-                    <div key={label} style={{
-                      display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 10,
-                      padding: "10px 14px", borderRadius: 8,
-                      background: isLow ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.03)",
-                      border: `1px solid ${isLow ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.07)"}`,
-                    }}>
-                      <span style={{ fontSize: 16, minWidth: 22 }}>{icon}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 10, letterSpacing: 2, color: isLow ? "#ffd700" : "rgba(232,244,240,0.4)", fontFamily: "monospace", marginBottom: 2 }}>
-                          {label}{isLow ? " ⚠ NOT SURE — PLEASE CONFIRM" : ""}
-                        </div>
-                        <div style={{ fontSize: 14, color: value ? "#e8f4f0" : "rgba(232,244,240,0.3)", fontFamily: "Georgia, serif" }}>
-                          {value || "Not found"}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <p style={{ fontSize: 11, color: "rgba(232,244,240,0.3)", fontFamily: "monospace", marginTop: 8, marginBottom: 0 }}>
-                  ⚠ highlighted fields had low confidence — please verify before continuing.
+            {/* Editable confirmation card */}
+            {confirmedExtraction && (
+              <Card title="📋 Confirm What We Found" subtitle="Fix anything that looks wrong before we draft your letters">
+
+                {/* Plan Type — most critical field */}
+                <ConfirmField
+                  icon="🏥" label="Plan Type" critical
+                  conf={denialExtraction?.confidence?.plan_type || "low"}
+                  hint="This determines which laws protect you. Please confirm."
+                >
+                  <select value={confirmedExtraction.plan_type || "unclear"}
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, plan_type: e.target.value })}
+                    style={selectStyle}>
+                    {Object.entries(PLAN_TYPE_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </ConfirmField>
+
+                {/* Denial Reason */}
+                <ConfirmField icon="⚖️" label="Denial Reason" conf={denialExtraction?.confidence?.denial_reason || "low"}>
+                  <select value={confirmedExtraction.denial_reason || "other"}
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, denial_reason: e.target.value })}
+                    style={selectStyle}>
+                    {Object.entries(DENIAL_REASON_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </ConfirmField>
+
+                {/* Appeal Level */}
+                <ConfirmField icon="🎯" label="Appeal Level" conf={denialExtraction?.confidence?.appeal_level || "high"}>
+                  <select value={confirmedExtraction.appeal_level || "unclear"}
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, appeal_level: e.target.value })}
+                    style={selectStyle}>
+                    {Object.entries(APPEAL_LEVEL_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </ConfirmField>
+
+                {/* Appeal Deadline */}
+                <ConfirmField icon="📅" label="Appeal Deadline" conf={denialExtraction?.confidence?.appeal_deadline || "low"}>
+                  <input type="date" value={confirmedExtraction.appeal_deadline || ""}
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, appeal_deadline: e.target.value })}
+                    style={inputStyle} />
+                </ConfirmField>
+
+                {/* Insurer */}
+                <ConfirmField icon="🏢" label="Insurance Company" conf="high">
+                  <input type="text" value={confirmedExtraction.insurer_name || ""}
+                    placeholder="Insurance company name"
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, insurer_name: e.target.value })}
+                    style={inputStyle} />
+                </ConfirmField>
+
+                {/* Service */}
+                <ConfirmField icon="💊" label="Service / Treatment Denied" conf="high">
+                  <input type="text" value={confirmedExtraction.service_denied || ""}
+                    placeholder="What was denied?"
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, service_denied: e.target.value })}
+                    style={inputStyle} />
+                </ConfirmField>
+
+                {/* State */}
+                <ConfirmField icon="📍" label="State" conf={denialExtraction?.confidence?.state || "low"}>
+                  <select value={confirmedExtraction.state || ""}
+                    onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, state: e.target.value })}
+                    style={selectStyle}>
+                    <option value="">Select state...</option>
+                    {Object.entries(STATE_COMMISSIONERS).map(([code, s]) => (
+                      <option key={code} value={code}>{s.name}</option>
+                    ))}
+                  </select>
+                </ConfirmField>
+
+                <p style={{ fontSize: 11, color: "rgba(255,215,0,0.4)", fontFamily: "monospace", marginTop: 4 }}>
+                  ⚠ yellow fields had low confidence — please review before continuing.
                 </p>
               </Card>
             )}
@@ -1084,6 +1131,42 @@ function HeavyHittersFooter() {
 
         </div>
       )}
+    </div>
+  );
+}
+
+const inputStyle = {
+  width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: 8, padding: "9px 12px", color: "#e8f4f0", fontSize: 14,
+  fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box",
+};
+
+const selectStyle = {
+  ...inputStyle,
+  cursor: "pointer",
+  appearance: "none",
+  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300e5a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 12px center",
+  paddingRight: 32,
+};
+
+function ConfirmField({ icon, label, children, conf, critical, hint }) {
+  const isLow = conf === "low" || critical;
+  return (
+    <div style={{
+      marginBottom: 12, padding: "10px 14px", borderRadius: 8,
+      background: isLow ? "rgba(255,215,0,0.05)" : "rgba(255,255,255,0.02)",
+      border: `1px solid ${isLow ? "rgba(255,215,0,0.3)" : "rgba(255,255,255,0.07)"}`,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 14 }}>{icon}</span>
+        <span style={{ fontSize: 10, letterSpacing: 2, fontFamily: "monospace", color: isLow ? "#ffd700" : "rgba(232,244,240,0.4)", textTransform: "uppercase" }}>
+          {label}{isLow ? " ⚠" : ""}
+        </span>
+      </div>
+      {children}
+      {hint && <p style={{ fontSize: 11, color: "rgba(255,215,0,0.6)", fontFamily: "monospace", margin: "6px 0 0" }}>{hint}</p>}
     </div>
   );
 }
