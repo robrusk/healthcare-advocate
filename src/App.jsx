@@ -1132,38 +1132,17 @@ function HeavyHittersFooter() {
 
           {/* Congressional Rep */}
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px" }}>
-            <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 10 }}>🏛 YOUR CONGRESSIONAL REPRESENTATIVE</div>
-            <p style={{ fontSize: 12, color: "rgba(232,244,240,0.5)", fontFamily: "monospace", marginBottom: 12, lineHeight: 1.5 }}>
-              A call from your Rep's constituent services office moves insurance companies faster than almost anything else. Enter your ZIP to find yours.
+            <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 10 }}>🏛️ YOUR CONGRESSIONAL REPRESENTATIVES</div>
+            <p style={{ fontSize: 12, color: "rgba(232,244,240,0.5)", fontFamily: "monospace", marginBottom: 14, lineHeight: 1.5 }}>
+              Enter your address below to view your specific federal representatives, their direct Washington D.C. office phone numbers, and contact forms instantly.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <a
-                href="https://www.house.gov/representatives/find-your-representative"
-                target="_blank" rel="noreferrer"
-                style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.3)",
-                  borderRadius: 8, padding: "12px 16px", textDecoration: "none",
-                  color: "#ffd700", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
-                }}
-              >
-                🏛 Find My House Representative →
-              </a>
-              <a
-                href="https://www.senate.gov/senators/senators-contact.htm"
-                target="_blank" rel="noreferrer"
-                style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)",
-                  borderRadius: 8, padding: "12px 16px", textDecoration: "none",
-                  color: "rgba(255,215,0,0.7)", fontSize: 14, fontWeight: 700, fontFamily: "Georgia, serif",
-                }}
-              >
-                🏛 Find My US Senators →
-              </a>
-              <p style={{ fontSize: 11, color: "rgba(232,244,240,0.3)", fontFamily: "monospace", margin: 0 }}>
-                Ask for constituent services and explain the insurance denial.
-              </p>
+            <div style={{ width: "100%", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, overflow: "hidden", background: "#0d1117" }}>
+              <iframe
+                src="https://democracy.io/embedded-lookup/"
+                title="Find Your Representatives"
+                style={{ width: "100%", height: 450, border: "none", display: "block" }}
+                loading="lazy"
+              />
             </div>
           </div>
 
