@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
 import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
+import { lookupVerifiedFacts } from "./library/index";
+import { FactsUsedCard } from "./components/FactsUsedCard";
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -252,6 +254,7 @@ export default function InsuranceFighter() {
   const [letters, setLetters] = useState({ insurance: "", hospital: "", doctor: "" });
   const [activeTab, setActiveTab] = useState("insurance");
   const [generating, setGenerating] = useState(false);
+  const [visibleCitations, setVisibleCitations] = useState([]);
   const [copied, setCopied] = useState(false);
   const [letterDone, setLetterDone] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -335,6 +338,13 @@ export default function InsuranceFighter() {
     const denialReasonKey = confirmedExtraction?.denial_reason || "medical_necessity";
     const template = loadTemplate(planType, denialReasonKey);
 
+    const { silentContext, visibleCitations: citations } = lookupVerifiedFacts({
+      plan_type: planType,
+      denial_reason: confirmedExtraction?.denial_reason || "medical_necessity",
+      state: confirmedExtraction?.state || null,
+    });
+    setVisibleCitations(citations);
+
     const isPatient = submitterRelationship === "patient";
     const signerName = submitterName || "[YOUR NAME]";
     const signerContact = [submitterPhone, submitterEmail].filter(Boolean).join(" | ") || "[YOUR PHONE / EMAIL]";
@@ -371,6 +381,7 @@ ${legalFramework}
 
 ${templateSection}
 
+${silentContext ? `VERIFIED FACTS — answer ONLY from these documents, not from training memory. If a needed fact is not here, write [VERIFY: ___] rather than guessing:\n\n${silentContext}\n` : ""}
 INSTRUCTIONS:
 1. Use ONLY the legal citations from the framework above — never introduce outside citations
 2. Replace all {{placeholder}} tokens with the actual case facts provided
@@ -452,6 +463,7 @@ INSTRUCTIONS:
     setLetters({ insurance: "", hospital: "", doctor: "" });
     setActiveTab("insurance");
     setGenerating(false);
+    setVisibleCitations([]);
     setLetterDone(false);
     setPhotoSummary("");
     setPhotoReading(false);
@@ -868,6 +880,7 @@ INSTRUCTIONS:
 
               {!generating && letters.insurance && (
                 <>
+                  <FactsUsedCard citations={visibleCitations} />
                   {/* Tabs */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
                     {[
