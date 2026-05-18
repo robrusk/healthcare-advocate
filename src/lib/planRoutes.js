@@ -104,3 +104,15 @@ Cite specifically: ${route.citations.join("; ")}
 Key rules to reference: ${route.keyRules.join(" | ")}
 ${route.doNotCite}`;
 }
+
+// Vite imports all template markdown files at build time as raw strings.
+// Key format: "../templates/<plan_type>/<denial_reason>.md"
+const TEMPLATES = import.meta.glob('../templates/**/*.md', { eager: true, query: '?raw', import: 'default' });
+
+// Returns the template markdown for a given plan_type + denial_reason, or null.
+// denial_reason uses the normalized keys from the extraction schema.
+export function loadTemplate(planType, denialReason) {
+  if (!planType || planType === "unclear") return null;
+  const key = `../templates/${planType}/${denialReason}.md`;
+  return TEMPLATES[key] || null;
+}

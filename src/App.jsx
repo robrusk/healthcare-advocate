@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
-import { buildLegalFramework } from "./lib/planRoutes";
+import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -331,6 +331,10 @@ export default function InsuranceFighter() {
     // Build the legal framework from the routing table
     const legalFramework = buildLegalFramework(planType);
 
+    // Load the vetted template for this plan/denial combination (may be null for stubs)
+    const denialReasonKey = confirmedExtraction?.denial_reason || "medical_necessity";
+    const template = loadTemplate(planType, denialReasonKey);
+
     const isPatient = submitterRelationship === "patient";
     const signerName = submitterName || "[YOUR NAME]";
     const signerContact = [submitterPhone, submitterEmail].filter(Boolean).join(" | ") || "[YOUR PHONE / EMAIL]";
@@ -355,16 +359,22 @@ Treatment/Service: ${resolvedService}
 Denial Reason: ${resolvedDenialReason}${resolvedDeadline ? `\nAppeal Deadline: ${resolvedDeadline}` : ""}${resolvedState ? `\nState: ${resolvedState}` : ""}
 Written by: ${signerName} (${relationshipLabel})`;
 
+    const templateSection = template
+      ? `VETTED APPEAL TEMPLATE — adapt this structure. Fill in placeholders with the case facts above. Do not deviate from the legal framework it establishes.\n\n${template}`
+      : `No specific template available for this plan type. Use the legal framework above as your sole source of citations.`;
+
     const insurancePrompt = `You are an expert patient advocate and healthcare attorney. Generate a powerful, legally precise insurance appeal letter.
 
 ${context}
 
 ${legalFramework}
 
+${templateSection}
+
 INSTRUCTIONS:
 1. Use ONLY the legal citations from the framework above — never introduce outside citations
-2. Use these clinical keywords throughout: ${info.powerWords.slice(0, 6).join(", ")}
-3. Include: formal heading, summary of denial, legal basis, clinical arguments, list of enclosed documents, deadline demand, escalation warning
+2. Replace all {{placeholder}} tokens with the actual case facts provided
+3. Use these clinical keywords throughout: ${info.powerWords.slice(0, 6).join(", ")}
 4. ${signerLine}
 5. ${closing}
 6. Assertive tone — this is a legal demand, not a polite request
