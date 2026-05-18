@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Anthropic from "@anthropic-ai/sdk";
-import { analyzePhoto, fileToBase64 } from "./lib/claude";
+import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -201,6 +201,33 @@ function ProgressBar({ value, color = "#00e5a0" }) {
   );
 }
 
+const PLAN_TYPE_LABELS = {
+  employer_erisa: "Employer-sponsored (ERISA)",
+  aca_marketplace: "ACA Marketplace / Exchange",
+  medicare_advantage: "Medicare Advantage (Part C)",
+  original_medicare: "Traditional Medicare (Parts A & B)",
+  medicaid: "Medicaid",
+  fehb: "Federal Employee (FEHB)",
+  unclear: "Unknown — please confirm",
+};
+
+const DENIAL_REASON_LABELS = {
+  medical_necessity: "Not Medically Necessary",
+  experimental: "Experimental / Investigational",
+  out_of_network: "Out-of-Network Provider",
+  not_covered: "Not a Covered Benefit",
+  prior_auth_missing: "Prior Authorization Missing",
+  step_therapy: "Step Therapy Required",
+  other: "Other / Unknown",
+};
+
+const APPEAL_LEVEL_LABELS = {
+  first_internal: "First Internal Appeal",
+  second_internal: "Second Internal Appeal",
+  external_review: "External Independent Review",
+  unclear: "Unknown — please confirm",
+};
+
 export default function InsuranceFighter() {
   const [step, setStep] = useState("upload");
   const [denialText, setDenialText] = useState("");
@@ -213,8 +240,11 @@ export default function InsuranceFighter() {
   const [claimNumber, setClaimNumber] = useState("");
   const [insurerName, setInsurerName] = useState("");
   const [treatment, setTreatment] = useState("");
+  const [photoBase64, setPhotoBase64] = useState(null);
+  const [photoMediaType, setPhotoMediaType] = useState(null);
   const [photoReading, setPhotoReading] = useState(false);
   const [photoSummary, setPhotoSummary] = useState("");
+  const [denialExtraction, setDenialExtraction] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [letters, setLetters] = useState({ insurance: "", hospital: "", doctor: "" });
@@ -237,6 +267,8 @@ export default function InsuranceFighter() {
     setPhotoSummary("");
     try {
       const base64 = await fileToBase64(file);
+      setPhotoBase64(base64);
+      setPhotoMediaType(file.type);
       const result = await analyzePhoto(base64, file.type);
       setPhotoSummary(result.plain_english);
       if (result.denial_reason) setDenialReason(result.denial_reason);
@@ -255,10 +287,18 @@ export default function InsuranceFighter() {
     if (!denialReason) return;
     setAnalyzing(true);
     setStep("analyze");
-    await new Promise((r) => setTimeout(r, 2200));
+
+    const [, extraction] = await Promise.all([
+      new Promise((r) => setTimeout(r, 800)),
+      photoBase64
+        ? analyzeDenial(photoBase64, photoMediaType).catch(() => null)
+        : Promise.resolve(null),
+    ]);
+
+    setDenialExtraction(extraction);
     setAnalysisResult(INSURANCE_KEYWORDS[denialReason]);
     setAnalyzing(false);
-    setTimeout(() => setStep("strategy"), 600);
+    setTimeout(() => setStep("strategy"), 400);
   };
 
   const generateLetter = async () => {
@@ -381,6 +421,9 @@ INSTRUCTIONS:
     setLetterDone(false);
     setPhotoSummary("");
     setPhotoReading(false);
+    setPhotoBase64(null);
+    setPhotoMediaType(null);
+    setDenialExtraction(null);
     setSubmitterName("");
     setSubmitterRelationship("patient");
     setSubmitterPhone("");
@@ -624,6 +667,46 @@ INSTRUCTIONS:
 
         {step === "strategy" && analysisResult && (
           <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
+
+            {/* Confirmation card — shown when we have extraction data */}
+            {denialExtraction && (
+              <Card title="📋 What We Found" subtitle="Review before we draft your letters — correct anything that looks wrong">
+                {[
+                  { icon: "🏢", label: "Insurer", value: denialExtraction.insurer_name || insurerName || null, conf: "high" },
+                  { icon: "🏥", label: "Plan Type", value: PLAN_TYPE_LABELS[denialExtraction.plan_type], conf: denialExtraction.confidence?.plan_type || "low" },
+                  { icon: "⚖️", label: "Denial Reason", value: DENIAL_REASON_LABELS[denialExtraction.denial_reason], conf: denialExtraction.confidence?.denial_reason || "low" },
+                  { icon: "💊", label: "Service Denied", value: denialExtraction.service_denied || treatment || null, conf: "high" },
+                  { icon: "📅", label: "Appeal Deadline", value: denialExtraction.appeal_deadline || null, conf: denialExtraction.confidence?.appeal_deadline || "low" },
+                  { icon: "🎯", label: "Appeal Level", value: APPEAL_LEVEL_LABELS[denialExtraction.appeal_level], conf: "high" },
+                  { icon: "📍", label: "State", value: denialExtraction.state || null, conf: denialExtraction.confidence?.state || "low" },
+                ].map(({ icon, label, value, conf }) => {
+                  const isLow = conf === "low";
+                  return (
+                    <div key={label} style={{
+                      display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 10,
+                      padding: "10px 14px", borderRadius: 8,
+                      background: isLow ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${isLow ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.07)"}`,
+                    }}>
+                      <span style={{ fontSize: 16, minWidth: 22 }}>{icon}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 10, letterSpacing: 2, color: isLow ? "#ffd700" : "rgba(232,244,240,0.4)", fontFamily: "monospace", marginBottom: 2 }}>
+                          {label}{isLow ? " ⚠ NOT SURE — PLEASE CONFIRM" : ""}
+                        </div>
+                        <div style={{ fontSize: 14, color: value ? "#e8f4f0" : "rgba(232,244,240,0.3)", fontFamily: "Georgia, serif" }}>
+                          {value || "Not found"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <p style={{ fontSize: 11, color: "rgba(232,244,240,0.3)", fontFamily: "monospace", marginTop: 8, marginBottom: 0 }}>
+                  ⚠ highlighted fields had low confidence — please verify before continuing.
+                </p>
+              </Card>
+            )}
+
+            {/* Battle plan */}
             <Card title="⚔️ Your Battle Plan" subtitle={`Win rate on appeal: ${analysisResult.winRate}`}>
               <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(0,229,160,0.08)", borderRadius: 10, border: "1px solid rgba(0,229,160,0.2)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -687,7 +770,7 @@ INSTRUCTIONS:
                   boxShadow: "0 0 30px rgba(255,60,60,0.3)",
                 }}
               >
-                ✉️ Generate AI Appeal Letter →
+                ✉️ Looks Right — Draft My Appeal →
               </button>
             </Card>
           </div>
