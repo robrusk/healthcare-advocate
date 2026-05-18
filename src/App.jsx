@@ -1069,7 +1069,7 @@ function HeavyHittersFooter() {
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
               style={{
-                width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
+                width: "100%", background: "#1a2535", border: "1px solid rgba(255,255,255,0.15)",
                 borderRadius: 8, padding: "10px 12px", color: "#e8f4f0", fontSize: 14,
                 fontFamily: "Georgia, serif", outline: "none", marginBottom: 12,
               }}
@@ -1162,6 +1162,8 @@ const inputStyle = {
 
 const selectStyle = {
   ...inputStyle,
+  background: "#1a2535",
+  color: "#e8f4f0",
   cursor: "pointer",
   appearance: "none",
   backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300e5a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")",
