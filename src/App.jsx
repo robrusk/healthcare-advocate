@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
+import { buildLegalFramework } from "./lib/planRoutes";
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -304,12 +305,31 @@ export default function InsuranceFighter() {
   };
 
   const generateLetter = async () => {
+    // Block generation if plan type is unconfirmed — wrong framework = dismissed appeal
+    const planType = confirmedExtraction?.plan_type || "unclear";
+    if (planType === "unclear") {
+      alert("Please confirm the Plan Type before generating your appeal. This determines which laws protect you.");
+      return;
+    }
+
     setGenerating(true);
     setStep("letter");
     setLetterDone(false);
     setActiveTab("insurance");
     const info = INSURANCE_KEYWORDS[denialReason];
     const reasonLabel = DENY_REASONS.find((r) => r.id === denialReason)?.label;
+
+    // Use confirmed extraction data when available, fall back to form fields
+    const resolvedInsurer = confirmedExtraction?.insurer_name || insurerName || "[INSURANCE COMPANY]";
+    const resolvedService = confirmedExtraction?.service_denied || treatment || "[TREATMENT]";
+    const resolvedDeadline = confirmedExtraction?.appeal_deadline || null;
+    const resolvedState = confirmedExtraction?.state || null;
+    const resolvedDenialReason = confirmedExtraction?.denial_reason
+      ? DENIAL_REASON_LABELS[confirmedExtraction.denial_reason]
+      : reasonLabel;
+
+    // Build the legal framework from the routing table
+    const legalFramework = buildLegalFramework(planType);
 
     const isPatient = submitterRelationship === "patient";
     const signerName = submitterName || "[YOUR NAME]";
@@ -330,23 +350,25 @@ export default function InsuranceFighter() {
 
     const context = `Patient: ${patientName || "[PATIENT NAME]"}
 Claim Number: ${claimNumber || "[CLAIM NUMBER]"}
-Insurance Company: ${insurerName || "[INSURANCE COMPANY]"}
-Treatment/Service: ${treatment || "[TREATMENT]"}
-Denial Reason: ${reasonLabel}
+Insurance Company: ${resolvedInsurer}
+Treatment/Service: ${resolvedService}
+Denial Reason: ${resolvedDenialReason}${resolvedDeadline ? `\nAppeal Deadline: ${resolvedDeadline}` : ""}${resolvedState ? `\nState: ${resolvedState}` : ""}
 Written by: ${signerName} (${relationshipLabel})`;
 
     const insurancePrompt = `You are an expert patient advocate and healthcare attorney. Generate a powerful, legally precise insurance appeal letter.
 
 ${context}
 
+${legalFramework}
+
 INSTRUCTIONS:
-1. Use these exact power keywords throughout: ${info.powerWords.slice(0, 6).join(", ")}
-2. Cite these laws specifically: ${info.laws.join(", ")}
+1. Use ONLY the legal citations from the framework above — never introduce outside citations
+2. Use these clinical keywords throughout: ${info.powerWords.slice(0, 6).join(", ")}
 3. Include: formal heading, summary of denial, legal basis, clinical arguments, list of enclosed documents, deadline demand, escalation warning
 4. ${signerLine}
 5. ${closing}
 6. Assertive tone — this is a legal demand, not a polite request
-7. End with a 30-day response deadline and External Review threat
+7. If appeal deadline is provided, reference it explicitly
 8. Under 600 words. Start with the date line. Write ONLY the letter.`;
 
     const hospitalPrompt = `You are a patient advocate. Write a firm, professional letter to the hospital on behalf of a patient whose insurance claim was denied.
