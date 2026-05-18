@@ -76,7 +76,7 @@ Healthcare Advocate is being structured as a 501(c)(3) nonprofit. The founding b
 ## Contact
 
 **Rob Rusk** — Founder
-ruskracing@gmail.com
+office@healthcareadvocate.org
 healthcareadvocate.org
 
 *Built in one day. Designed to last.*
