@@ -73,7 +73,7 @@ Extract exactly these fields:
 }
 
 CRITICAL RULES:
-- Return JSON ONLY. No text before or after the JSON object.
+- Return JSON ONLY. No markdown code fences. No text before or after the JSON object.
 - If a field is not clearly stated in the letter, return null.
 - Do not guess. Do not invent. "unclear" and null are correct answers.
 - For plan_type: employer insurance = employer_erisa, marketplace/exchange = aca_marketplace, Medicare HMO/PPO = medicare_advantage, traditional Medicare = original_medicare.
@@ -92,7 +92,12 @@ Look at this denial letter and respond with a JSON object containing these field
   "treatment": "The treatment, service, or medication that was denied, or empty string if not visible"
 }
 
-Respond with ONLY the JSON object. No other text.`
+Respond with ONLY the raw JSON object. No markdown code fences. No other text.`
+
+// Strip markdown code fences if the model wraps JSON in ```json ... ``` blocks
+function stripFences(text) {
+  return text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+}
 
 function fileContent(imageBase64, mediaType) {
   return mediaType === 'application/pdf'
@@ -116,7 +121,7 @@ export async function analyzeDenial(imageBase64, mediaType) {
     ],
   })
 
-  const parsed = JSON.parse(response.content[0].text)
+  const parsed = JSON.parse(stripFences(response.content[0].text))
 
   // Sanitize enum fields — fall back to 'unclear' / 'other' if model returns garbage
   if (!VALID_PLAN_TYPES.includes(parsed.plan_type)) parsed.plan_type = 'unclear'
@@ -139,7 +144,7 @@ export async function analyzePhoto(imageBase64, mediaType) {
     ],
   })
 
-  const parsed = JSON.parse(response.content[0].text)
+  const parsed = JSON.parse(stripFences(response.content[0].text))
   if (!DENIAL_REASON_IDS.includes(parsed.denial_reason)) {
     parsed.denial_reason = 'other'
   }
