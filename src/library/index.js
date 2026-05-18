@@ -3,6 +3,7 @@
 const LIBRARY_FILES = import.meta.glob('./**/*.md', { eager: true, query: '?raw', import: 'default' })
 
 export function parseMarkdown(rawText) {
+  if (!rawText) return { meta: {}, body: '' }
   const match = rawText.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
   if (!match) return { meta: {}, body: rawText }
 

@@ -105,4 +105,18 @@ Colorado specific content.`,
     expect(result.visibleCitations).toHaveLength(1)
     expect(result.silentContext).toContain('This is the body of the document.')
   })
+
+  it('uses fallback values when frontmatter fields are missing', () => {
+    const filesWithEmptyFrontmatter = {
+      './employer_erisa/medical_necessity.md': `---
+---
+Body without meta fields.`,
+    }
+    const result = lookupVerifiedFacts(
+      { plan_type: 'employer_erisa', denial_reason: 'medical_necessity', state: null },
+      filesWithEmptyFrontmatter
+    )
+    expect(result.visibleCitations[0].title).toBe('medical_necessity Guidelines')
+    expect(result.visibleCitations[0].source).toBe('Official Guidelines')
+  })
 })
