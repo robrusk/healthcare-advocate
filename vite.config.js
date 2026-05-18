@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/PatientAdvocate/',
+  base: '/',
   build: {
     cssMinify: 'esbuild',
   },
@@ -13,15 +13,15 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/icon.svg'],
       manifest: {
-        name: 'Patient Advocate',
-        short_name: 'PatientAdvocate',
+        name: 'Healthcare Advocate',
+        short_name: 'HealthcareAdvocate',
         description: 'Fight insurance denials. Free, private, and on your side.',
         theme_color: '#00e5a0',
         background_color: '#0a0e1a',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/PatientAdvocate/',
-        scope: '/PatientAdvocate/',
+        start_url: '/',
+        scope: '/',
         icons: [
           {
             src: 'icons/icon.svg',

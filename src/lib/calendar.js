@@ -20,7 +20,7 @@ export function downloadAppealReminder({ deadline, insurerName, claimNumber, den
     claimNumber ? `Claim: ${claimNumber}` : '',
     denialReason ? `Denial: ${denialReason}` : '',
     'Review your appeal letters in the Patient Advocate app.',
-    `https://ruskracing.com/PatientAdvocate`,
+    `https://healthcareadvocate.org`,
   ].filter(Boolean).join('\\n')
 
   const ics = [
