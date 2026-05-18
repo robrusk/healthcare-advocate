@@ -1,12 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk'
-
-const client = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true,
-  defaultHeaders: {
-    'anthropic-beta': 'pdfs-2024-09-25',
-  },
-})
+// All Claude API calls route through the Cloudflare Worker proxy.
+// The API key lives in the worker — never in the browser.
+const WORKER_URL = 'https://icy-silence-e717.rob-3ea.workers.dev/'
 
 const VALID_PLAN_TYPES = [
   'employer_erisa',
@@ -105,9 +99,19 @@ function fileContent(imageBase64, mediaType) {
     : { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } }
 }
 
+async function callClaude(body) {
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`Worker error ${res.status}: ${await res.text()}`)
+  return res.json()
+}
+
 // Pass 1 — narrow extraction. Uses Haiku (cheap/fast). Returns structured JSON only.
 export async function analyzeDenial(imageBase64, mediaType) {
-  const response = await client.messages.create({
+  const data = await callClaude({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     messages: [
@@ -121,19 +125,16 @@ export async function analyzeDenial(imageBase64, mediaType) {
     ],
   })
 
-  const parsed = JSON.parse(stripFences(response.content[0].text))
-
-  // Sanitize enum fields — fall back to 'unclear' / 'other' if model returns garbage
+  const parsed = JSON.parse(stripFences(data.content[0].text))
   if (!VALID_PLAN_TYPES.includes(parsed.plan_type)) parsed.plan_type = 'unclear'
   if (!VALID_DENIAL_REASONS.includes(parsed.denial_reason)) parsed.denial_reason = 'other'
   if (!VALID_APPEAL_LEVELS.includes(parsed.appeal_level)) parsed.appeal_level = 'unclear'
-
   return parsed
 }
 
 // Plain-English summary + basic field extraction for the upload step preview
 export async function analyzePhoto(imageBase64, mediaType) {
-  const response = await client.messages.create({
+  const data = await callClaude({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     messages: [
@@ -144,7 +145,7 @@ export async function analyzePhoto(imageBase64, mediaType) {
     ],
   })
 
-  const parsed = JSON.parse(stripFences(response.content[0].text))
+  const parsed = JSON.parse(stripFences(data.content[0].text))
   if (!DENIAL_REASON_IDS.includes(parsed.denial_reason)) {
     parsed.denial_reason = 'other'
   }

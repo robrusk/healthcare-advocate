@@ -1,18 +1,21 @@
 import { useState, useEffect, useRef } from "react";
-import Anthropic from "@anthropic-ai/sdk";
 import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
 import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
 import { lookupVerifiedFacts } from "./library/index";
 import { FactsUsedCard } from "./components/FactsUsedCard";
 import { downloadAppealReminder } from "./lib/calendar";
 
-const client = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true,
-  defaultHeaders: {
-    'anthropic-beta': 'pdfs-2024-09-25',
-  },
-});
+const WORKER_URL = 'https://icy-silence-e717.rob-3ea.workers.dev/';
+
+async function callClaude(body) {
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Worker error ${res.status}: ${await res.text()}`);
+  return res.json();
+}
 
 const DENY_REASONS = [
   { id: "not_medically_necessary", label: "Not Medically Necessary" },
@@ -426,7 +429,7 @@ INSTRUCTIONS:
 - Respectful, collegial tone — this is a request, not a demand
 - Under 400 words. Start with the date line. Write ONLY the letter.`;
 
-    const call = (prompt) => client.messages.create({
+    const call = (prompt) => callClaude({
       model: "claude-opus-4-7",
       max_tokens: 1000,
       messages: [{ role: "user", content: prompt }],
