@@ -622,7 +622,7 @@ INSTRUCTIONS:
       <div style={{ position: "relative", zIndex: 1, maxWidth: 680, margin: "0 auto", padding: "20px 16px 60px" }}>
 
         <div style={{ textAlign: "center", padding: "32px 0 24px", opacity: animateIn ? 1 : 0, transform: animateIn ? "none" : "translateY(-20px)", transition: "all 0.8s ease" }}>
-          <div style={{ fontSize: 17, letterSpacing: 4, color: "#00e5a0", textTransform: "uppercase", marginBottom: 10, fontFamily: "monospace" }}>
+          <div style={{ fontSize: 26, letterSpacing: 4, color: "#00e5a0", textTransform: "uppercase", marginBottom: 12, fontFamily: "monospace" }}>
             🛡️ healthcareadvocate.org
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 8px", lineHeight: 1.2, letterSpacing: -0.5 }}>
@@ -633,7 +633,7 @@ INSTRUCTIONS:
           </p>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: 0, marginBottom: 32, opacity: animateIn ? 1 : 0, transition: "opacity 1s ease 0.3s" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 0, marginBottom: 32, opacity: (animateIn && (step !== 'upload' || photoSummary || photoReading)) ? 1 : 0, transition: "opacity 1s ease 0.3s", pointerEvents: (step === 'upload' && !photoSummary && !photoReading) ? 'none' : 'auto' }}>
           {currentSteps.map((s, i) => (
             <div key={s.id} style={{ display: "flex", alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: i <= stepIndex ? 1 : 0.3, transition: "opacity 0.4s" }}>
@@ -686,7 +686,7 @@ INSTRUCTIONS:
                       Fight a Denial
                     </h2>
                     <p style={{ fontSize: 13, color: "rgba(232,244,240,0.7)", lineHeight: 1.5, margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
-                      Insurance denied your claim? You have a deadline. Let's fight back.
+                      Insurance denied your claim?<br/>You have a deadline.<br/>Let's fight back.
                     </p>
                     <label
                       htmlFor="unified-file-input"
