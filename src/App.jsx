@@ -749,6 +749,28 @@ INSTRUCTIONS:
                     Not sure what you have? Tap here and we'll figure it out.
                   </label>
                 </p>
+
+                {/* Why This Exists */}
+                <div style={{
+                  marginTop: 24, borderTop: "1px solid rgba(255,255,255,0.07)",
+                  paddingTop: 20,
+                }}>
+                  <div style={{ fontSize: 12, letterSpacing: 2, color: "rgba(232,244,240,0.35)", fontFamily: "monospace", marginBottom: 12 }}>
+                    📖 WHY THIS EXISTS
+                  </div>
+                  <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
+                    This site was built by a caregiver who watched his parents — and too many other families — get buried under denial letters and confusing medical bills they didn't have the time, energy, or expertise to fight.
+                  </p>
+                  <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
+                    The healthcare system bets on you giving up. Most people do. The success rate when patients actually appeal denials is around 50% — but only about 1% of denials ever get appealed.
+                  </p>
+                  <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
+                    This tool exists to close that gap. It's free, run as a volunteer project, not a business. No ads. No upsells. No subscriptions. If it helps you, share it with someone else who needs it.
+                  </p>
+                  <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.4)", fontFamily: "Georgia, serif", fontStyle: "italic", margin: 0 }}>
+                    Built by a real person who's been there. Not legal advice — but a real place to start.
+                  </p>
+                </div>
               </div>
             )}
 
