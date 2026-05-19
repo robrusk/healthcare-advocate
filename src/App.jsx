@@ -345,6 +345,7 @@ export default function InsuranceFighter() {
   };
 
   const generateBillingLetters = async () => {
+    if (!billExtraction) return;
     setGeneratingBilling(true);
     setStep("bill_letters");
     setActiveBillingTab("itemized_request");
@@ -355,8 +356,8 @@ export default function InsuranceFighter() {
     const accountNumber = billExtraction.account_number || "[ACCOUNT NUMBER]";
 
     const flaggedItems = (billExtraction.line_items || [])
-      .filter(item => item.flags.length > 0)
-      .map(item => `- ${item.description} (${item.amount || 'amount unclear'}): ${item.flags.join(', ')}`)
+      .filter(item => (item.flags || []).length > 0)
+      .map(item => `- ${item.description} (${item.amount || 'amount unclear'}): ${(item.flags || []).join(', ')}`)
       .join('\n');
 
     const missingInfo = (billExtraction.missing_info || []).join(', ');
@@ -400,22 +401,22 @@ INSTRUCTIONS:
 7. Under 400 words. Start with the date line. Write ONLY the letter.`;
 
     try {
-      const letters = { itemized_request: '', biller_error_dispute: '' };
+      const letterDraft = { itemized_request: '', biller_error_dispute: '' };
 
       const calls = [
         callClaude({ model: "claude-opus-4-7", max_tokens: 800, messages: [{ role: "user", content: itemizedPrompt }] })
-          .then(r => { letters.itemized_request = r.content.find(b => b.type === "text")?.text || "" }),
+          .then(r => { letterDraft.itemized_request = r.content.find(b => b.type === "text")?.text || "" }),
       ];
 
       if (billExtraction.biller_error_detected) {
         calls.push(
           callClaude({ model: "claude-opus-4-7", max_tokens: 800, messages: [{ role: "user", content: billerErrorPrompt }] })
-            .then(r => { letters.biller_error_dispute = r.content.find(b => b.type === "text")?.text || "" })
+            .then(r => { letterDraft.biller_error_dispute = r.content.find(b => b.type === "text")?.text || "" })
         );
       }
 
       await Promise.all(calls);
-      setBillingLetters(letters);
+      setBillingLetters(letterDraft);
     } catch (e) {
       setBillingLetters({ itemized_request: "Error generating letter. Please try again.", biller_error_dispute: "" });
     }
