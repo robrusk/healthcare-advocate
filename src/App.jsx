@@ -735,21 +735,19 @@ INSTRUCTIONS:
                   </div>
                 </div>
 
-                {/* Fallback link */}
+                {/* Fallback link — uses label to ensure iOS Safari file picker opens reliably */}
                 <p style={{ textAlign: "center", margin: "4px 0 0" }}>
-                  <button
-                    onClick={() => {
-                      setDocumentType(null);
-                      document.getElementById('unified-file-input').click();
-                    }}
+                  <label
+                    htmlFor="unified-file-input"
+                    onClick={() => setDocumentType(null)}
                     style={{
-                      background: "none", border: "none", cursor: "pointer",
+                      cursor: "pointer",
                       color: "rgba(232,244,240,0.35)", fontSize: 12,
                       fontFamily: "monospace", textDecoration: "underline",
                     }}
                   >
                     Not sure what you have? Tap here and we'll figure it out.
-                  </button>
+                  </label>
                 </p>
               </div>
             )}
