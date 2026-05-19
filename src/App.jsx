@@ -1,3 +1,46 @@
+// =============================================================================
+// App.jsx — Healthcare Advocate main component
+// healthcareadvocate.org | office@healthcareadvocate.org
+// =============================================================================
+//
+// USER FLOW
+// ─────────
+// Home screen (two cards)
+//   → User taps "Fight a Denial" or "Review a Bill" → sets documentType
+//   → File picker opens → handlePhoto() runs
+//     → analyzePhoto() — Haiku model, extracts plain-English summary + basic fields
+//   → Form appears with summary + fields
+//   → User clicks Analyze
+//     → runAnalysis() branches:
+//         [denial_letter] → analyzeDenial() → confirmation card → battle plan → generateLetter()
+//         [medical_bill]  → analyzeMedicalBill() → BillReviewScreen → generateBillingLetters()
+//
+// KEY STATE
+// ─────────
+//   step              — current screen: upload | analyze | strategy | letter |
+//                                       bill_review | bill_letters
+//   documentType      — 'denial_letter' | 'medical_bill' | null (null = AI detects)
+//   photoSummary      — plain-English explanation shown after photo upload
+//   confirmedExtraction — user-reviewed extraction data (plan type, deadline, etc.)
+//   billExtraction    — extracted medical bill data (line items, flags, biller error)
+//
+// TWO-PASS ARCHITECTURE (denial letters)
+// ───────────────────────────────────────
+// Pass 1: analyzeDenial() — Haiku extracts structured JSON, never writes letters
+// Pass 2: User confirms plan type, denial reason, deadline on the confirmation card
+// Pass 3: generateLetter() — Opus writes letters using confirmed data + planRoutes.js
+//         legal framework + src/templates/ vetted structure + src/library/ verified facts
+//
+// WHY THIS MATTERS: Citing ERISA on a Medicare denial gets the appeal dismissed.
+// planRoutes.js enforces the correct legal framework per plan type. If plan_type
+// is 'unclear', letter generation is blocked until the user clarifies.
+//
+// CLOUDFLARE WORKER
+// ─────────────────
+// All Claude API calls go through a Worker proxy (WORKER_URL below).
+// The Anthropic API key lives in the Worker — never in this bundle.
+// =============================================================================
+
 import { useState, useEffect, useRef } from "react";
 import { analyzePhoto, analyzeDenial, analyzeMedicalBill, fileToBase64 } from "./lib/claude";
 import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
