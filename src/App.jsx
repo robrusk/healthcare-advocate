@@ -680,6 +680,7 @@ INSTRUCTIONS:
                     border: "2px solid rgba(255,60,60,0.4)", borderRadius: 16,
                     padding: "20px 16px", display: "flex", flexDirection: "column",
                     gap: 12, boxShadow: "0 0 24px rgba(255,60,60,0.1)",
+                    justifyContent: "space-between",
                   }}>
                     <div style={{ fontSize: 22, textAlign: "center" }}>⚔️</div>
                     <h2 style={{ fontSize: 17, fontWeight: 800, color: "#ff6060", margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
@@ -710,6 +711,7 @@ INSTRUCTIONS:
                     border: "2px solid rgba(0,229,160,0.35)", borderRadius: 16,
                     padding: "20px 16px", display: "flex", flexDirection: "column",
                     gap: 12, boxShadow: "0 0 24px rgba(0,229,160,0.08)",
+                    justifyContent: "space-between",
                   }}>
                     <div style={{ fontSize: 22, textAlign: "center" }}>🧾</div>
                     <h2 style={{ fontSize: 17, fontWeight: 800, color: "#00e5a0", margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
