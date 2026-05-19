@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { analyzePhoto, analyzeDenial, fileToBase64 } from "./lib/claude";
+import { analyzePhoto, analyzeDenial, analyzeMedicalBill, fileToBase64 } from "./lib/claude";
 import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
 import { lookupVerifiedFacts } from "./library/index";
 import { FactsUsedCard } from "./components/FactsUsedCard";
+import BillReviewScreen from "./components/BillReviewScreen";
 import { downloadAppealReminder } from "./lib/calendar";
 
 const WORKER_URL = 'https://icy-silence-e717.rob-3ea.workers.dev/';
@@ -263,11 +264,27 @@ export default function InsuranceFighter() {
   const [letterDone, setLetterDone] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
 
+  const [documentType, setDocumentType] = useState(null);
+  const [billExtraction, setBillExtraction] = useState(null);
+  const [billingLetters, setBillingLetters] = useState({ itemized_request: '', biller_error_dispute: '' });
+  const [activeBillingTab, setActiveBillingTab] = useState('itemized_request');
+  const [generatingBilling, setGeneratingBilling] = useState(false);
+  const [photoBase64Stored, setPhotoBase64Stored] = useState(null);
+  const [photoMediaTypeStored, setPhotoMediaTypeStored] = useState(null);
+
   useEffect(() => {
     setTimeout(() => setAnimateIn(true), 100);
   }, []);
 
-  const stepIndex = STEPS.findIndex((s) => s.id === step);
+  const currentSteps = documentType === 'medical_bill'
+    ? [
+        { id: "upload", label: "Scan Bill", icon: "📄" },
+        { id: "analyze", label: "AI Analysis", icon: "🔍" },
+        { id: "bill_review", label: "Bill Review", icon: "🧾" },
+        { id: "bill_letters", label: "Dispute Letters", icon: "✉️" },
+      ]
+    : STEPS;
+  const stepIndex = currentSteps.findIndex((s) => s.id === step);
 
   const handlePhoto = async (e) => {
     const file = e.target.files[0];
@@ -278,7 +295,10 @@ export default function InsuranceFighter() {
       const base64 = await fileToBase64(file);
       setPhotoBase64(base64);
       setPhotoMediaType(file.type);
+      setPhotoBase64Stored(base64);
+      setPhotoMediaTypeStored(file.type);
       const result = await analyzePhoto(base64, file.type);
+      setDocumentType(result.document_type || 'denial_letter');
       setPhotoSummary(result.plain_english);
       if (result.denial_reason) setDenialReason(result.denial_reason);
       if (result.patient_name) setPatientName(result.patient_name);
@@ -293,9 +313,22 @@ export default function InsuranceFighter() {
   };
 
   const runAnalysis = async () => {
-    if (!denialReason) return;
     setAnalyzing(true);
     setStep("analyze");
+
+    if (documentType === 'medical_bill') {
+      try {
+        const bill = await analyzeMedicalBill(photoBase64Stored, photoMediaTypeStored);
+        setBillExtraction(bill);
+      } catch {
+        setBillExtraction({ line_items: [], missing_info: [], biller_error_detected: false, biller_error_description: null, plain_english: "Could not fully read this bill. Please review manually." });
+      }
+      setAnalyzing(false);
+      setTimeout(() => setStep("bill_review"), 400);
+      return;
+    }
+
+    if (!denialReason) { setAnalyzing(false); return; }
 
     const [, extraction] = await Promise.all([
       new Promise((r) => setTimeout(r, 800)),
@@ -309,6 +342,84 @@ export default function InsuranceFighter() {
     setAnalysisResult(INSURANCE_KEYWORDS[denialReason]);
     setAnalyzing(false);
     setTimeout(() => setStep("strategy"), 400);
+  };
+
+  const generateBillingLetters = async () => {
+    setGeneratingBilling(true);
+    setStep("bill_letters");
+    setActiveBillingTab("itemized_request");
+
+    const signerName = submitterName || "[YOUR NAME]";
+    const signerContact = [submitterPhone, submitterEmail].filter(Boolean).join(" | ") || "[YOUR PHONE / EMAIL]";
+    const providerName = billExtraction.provider_name || "[PROVIDER NAME]";
+    const accountNumber = billExtraction.account_number || "[ACCOUNT NUMBER]";
+
+    const flaggedItems = (billExtraction.line_items || [])
+      .filter(item => item.flags.length > 0)
+      .map(item => `- ${item.description} (${item.amount || 'amount unclear'}): ${item.flags.join(', ')}`)
+      .join('\n');
+
+    const missingInfo = (billExtraction.missing_info || []).join(', ');
+
+    const itemizedPrompt = `You are a patient advocate. Write a firm, professional letter to the medical billing department requesting an itemized bill.
+
+Provider: ${providerName}
+Account Number: ${accountNumber}
+Patient: ${billExtraction.patient_name || "[PATIENT NAME]"}
+Bill Date: ${billExtraction.bill_date || "[BILL DATE]"}
+Total Billed: ${billExtraction.total_amount || "[TOTAL AMOUNT]"}
+Written by: ${signerName}
+${flaggedItems ? `\nFlagged charges requiring clarification:\n${flaggedItems}` : ''}
+${missingInfo ? `\nMissing required information: ${missingInfo}` : ''}
+
+INSTRUCTIONS:
+1. Demand a complete itemized statement with CPT codes for every charge
+2. Request the date of service for each line item
+3. Request the name and NPI of the provider who ordered each service
+4. Request confirmation of what was submitted to insurance and what insurance paid
+5. If flagged charges exist, call each one out specifically and demand clarification
+6. Close with: "I will not process payment until I receive the requested documentation."
+7. ${signerName === "[YOUR NAME]" ? "Use [YOUR NAME] as placeholder for signature" : `Close with ${signerName}'s name and contact: ${signerContact}`}
+8. Under 400 words. Start with the date line. Write ONLY the letter.`;
+
+    const billerErrorPrompt = `You are a patient advocate. Write a firm letter asserting that the patient is not responsible for a billing department error.
+
+Provider: ${providerName}
+Account Number: ${accountNumber}
+Patient: ${billExtraction.patient_name || "[PATIENT NAME]"}
+Error Description: ${billExtraction.biller_error_description || "The billing department submitted to the wrong insurance company or missed a filing deadline."}
+Written by: ${signerName}
+
+INSTRUCTIONS:
+1. Assert clearly that the patient provided correct insurance information at time of service
+2. State that any denial resulting from incorrect submission sequence or missed filing deadlines is the provider's liability, not the patient's
+3. Demand the billing department resolve the matter with the insurers directly before pursuing the patient for payment
+4. Explicitly state the patient will not pay this balance until the billing error is corrected
+5. Reference that timely filing denials caused by biller error are not patient responsibility under applicable billing regulations
+6. ${signerName === "[YOUR NAME]" ? "Use [YOUR NAME] as placeholder for signature" : `Close with ${signerName}'s name and contact: ${signerContact}`}
+7. Under 400 words. Start with the date line. Write ONLY the letter.`;
+
+    try {
+      const letters = { itemized_request: '', biller_error_dispute: '' };
+
+      const calls = [
+        callClaude({ model: "claude-opus-4-7", max_tokens: 800, messages: [{ role: "user", content: itemizedPrompt }] })
+          .then(r => { letters.itemized_request = r.content.find(b => b.type === "text")?.text || "" }),
+      ];
+
+      if (billExtraction.biller_error_detected) {
+        calls.push(
+          callClaude({ model: "claude-opus-4-7", max_tokens: 800, messages: [{ role: "user", content: billerErrorPrompt }] })
+            .then(r => { letters.biller_error_dispute = r.content.find(b => b.type === "text")?.text || "" })
+        );
+      }
+
+      await Promise.all(calls);
+      setBillingLetters(letters);
+    } catch (e) {
+      setBillingLetters({ itemized_request: "Error generating letter. Please try again.", biller_error_dispute: "" });
+    }
+    setGeneratingBilling(false);
   };
 
   const generateLetter = async () => {
@@ -479,6 +590,13 @@ INSTRUCTIONS:
     setSubmitterRelationship("patient");
     setSubmitterPhone("");
     setSubmitterEmail("");
+    setDocumentType(null);
+    setBillExtraction(null);
+    setBillingLetters({ itemized_request: '', biller_error_dispute: '' });
+    setActiveBillingTab('itemized_request');
+    setGeneratingBilling(false);
+    setPhotoBase64Stored(null);
+    setPhotoMediaTypeStored(null);
   };
 
   return (
@@ -518,7 +636,7 @@ INSTRUCTIONS:
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 0, marginBottom: 32, opacity: animateIn ? 1 : 0, transition: "opacity 1s ease 0.3s" }}>
-          {STEPS.map((s, i) => (
+          {currentSteps.map((s, i) => (
             <div key={s.id} style={{ display: "flex", alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: i <= stepIndex ? 1 : 0.3, transition: "opacity 0.4s" }}>
                 <div style={{
@@ -532,7 +650,7 @@ INSTRUCTIONS:
                 </div>
                 <span style={{ fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: "monospace", color: i === stepIndex ? "#00e5a0" : "rgba(255,255,255,0.4)" }}>{s.label}</span>
               </div>
-              {i < STEPS.length - 1 && (
+              {i < currentSteps.length - 1 && (
                 <div style={{ width: 32, height: 2, background: i < stepIndex ? "#00e5a0" : "rgba(255,255,255,0.1)", margin: "0 4px", marginBottom: 24, transition: "background 0.4s" }} />
               )}
             </div>
@@ -686,7 +804,7 @@ INSTRUCTIONS:
 
                 <button
                   onClick={runAnalysis}
-                  disabled={!denialReason}
+                  disabled={documentType === 'medical_bill' ? false : !denialReason}
                   style={{
                     background: denialReason ? "linear-gradient(135deg, #00e5a0, #00b87a)" : "rgba(255,255,255,0.05)",
                     border: "none", borderRadius: 10, padding: "16px 24px", cursor: denialReason ? "pointer" : "not-allowed",
@@ -695,7 +813,7 @@ INSTRUCTIONS:
                     boxShadow: denialReason ? "0 0 30px rgba(0,229,160,0.3)" : "none",
                   }}
                 >
-                  🔍 Analyze My Denial →
+                  {documentType === 'medical_bill' ? '🔍 Analyze This Bill →' : '🔍 Analyze My Denial →'}
                 </button>
               </div>
             </Card>
@@ -714,6 +832,16 @@ INSTRUCTIONS:
               ))}
             </div>
           </Card>
+        )}
+
+        {step === "bill_review" && billExtraction && (
+          <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
+            <BillReviewScreen
+              bill={billExtraction}
+              onGenerate={generateBillingLetters}
+              onSwitch={() => { setDocumentType('denial_letter'); setStep('upload'); }}
+            />
+          </div>
         )}
 
         {step === "strategy" && analysisResult && (
@@ -868,6 +996,98 @@ INSTRUCTIONS:
                 ✉️ Looks Right — Draft My Appeal →
               </button>
             </Card>
+          </div>
+        )}
+
+        {step === "bill_letters" && (
+          <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
+            <div style={{
+              background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16,
+              padding: "24px 20px", marginBottom: 16,
+              boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
+            }}>
+              <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <h2 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700 }}>✉️ Your Dispute Letters</h2>
+                <p style={{ margin: 0, fontSize: 12, color: "rgba(232,244,240,0.45)", fontFamily: "monospace" }}>
+                  Ready to send — review and edit before mailing
+                </p>
+              </div>
+
+              {generatingBilling && (
+                <div style={{ textAlign: "center", padding: "32px 0" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>✍️</div>
+                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>Writing your dispute letters...</p>
+                </div>
+              )}
+
+              {!generatingBilling && billingLetters.itemized_request && (
+                <>
+                  <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+                    <button
+                      onClick={() => setActiveBillingTab("itemized_request")}
+                      style={{
+                        flex: 1, padding: "10px 6px", cursor: "pointer", fontSize: 12,
+                        fontFamily: "Georgia, serif", borderRadius: 8, transition: "all 0.2s",
+                        background: activeBillingTab === "itemized_request" ? "rgba(0,229,160,0.15)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${activeBillingTab === "itemized_request" ? "#00e5a0" : "rgba(255,255,255,0.1)"}`,
+                        color: activeBillingTab === "itemized_request" ? "#00e5a0" : "rgba(232,244,240,0.5)",
+                        fontWeight: activeBillingTab === "itemized_request" ? 700 : 400,
+                      }}
+                    >📄 Itemized Bill Request</button>
+                    {billExtraction?.biller_error_detected && (
+                      <button
+                        onClick={() => setActiveBillingTab("biller_error_dispute")}
+                        style={{
+                          flex: 1, padding: "10px 6px", cursor: "pointer", fontSize: 12,
+                          fontFamily: "Georgia, serif", borderRadius: 8, transition: "all 0.2s",
+                          background: activeBillingTab === "biller_error_dispute" ? "rgba(255,60,60,0.15)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${activeBillingTab === "biller_error_dispute" ? "#ff6060" : "rgba(255,255,255,0.1)"}`,
+                          color: activeBillingTab === "biller_error_dispute" ? "#ff6060" : "rgba(232,244,240,0.5)",
+                          fontWeight: activeBillingTab === "biller_error_dispute" ? 700 : 400,
+                        }}
+                      >🚨 Billing Error Dispute</button>
+                    )}
+                  </div>
+
+                  <div style={{
+                    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 10, padding: 20, marginBottom: 16, maxHeight: 500, overflowY: "auto",
+                  }}>
+                    <pre style={{ fontFamily: "Georgia, serif", fontSize: 13, lineHeight: 1.7, color: "rgba(232,244,240,0.9)", whiteSpace: "pre-wrap", margin: 0 }}>
+                      {billingLetters[activeBillingTab] || ""}
+                    </pre>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(billingLetters[activeBillingTab] || ""); }}
+                      style={{
+                        flex: 1, background: "rgba(0,229,160,0.1)", border: "1px solid #00e5a0",
+                        borderRadius: 8, padding: "12px 16px", cursor: "pointer",
+                        color: "#00e5a0", fontSize: 14, fontFamily: "Georgia, serif",
+                      }}
+                    >📋 Copy Letter</button>
+                    <button
+                      onClick={generateBillingLetters}
+                      style={{
+                        flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: 8, padding: "12px 16px", cursor: "pointer",
+                        color: "rgba(232,244,240,0.6)", fontSize: 14, fontFamily: "Georgia, serif",
+                      }}
+                    >🔄 Regenerate</button>
+                  </div>
+                </>
+              )}
+
+              <button onClick={reset} style={{
+                width: "100%", marginTop: 8, background: "transparent",
+                border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "12px",
+                cursor: "pointer", color: "rgba(232,244,240,0.4)", fontSize: 13, fontFamily: "Georgia, serif",
+              }}>
+                ← Start Over
+              </button>
+            </div>
           </div>
         )}
 
