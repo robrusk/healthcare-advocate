@@ -1374,7 +1374,7 @@ function HeavyHittersFooter() {
 }
 
 const inputStyle = {
-  width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)",
+  width: "100%", background: "#1a2535", border: "1px solid rgba(255,255,255,0.15)",
   borderRadius: 8, padding: "9px 12px", color: "#e8f4f0", fontSize: 14,
   fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box",
 };
@@ -1401,7 +1401,7 @@ function ConfirmField({ icon, label, children, conf, critical, hint }) {
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
         <span style={{ fontSize: 14 }}>{icon}</span>
-        <span style={{ fontSize: 10, letterSpacing: 2, fontFamily: "monospace", color: isLow ? "#ffd700" : "rgba(232,244,240,0.4)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 10, letterSpacing: 2, fontFamily: "monospace", color: isLow ? "#ffd700" : "rgba(232,244,240,0.7)", textTransform: "uppercase" }}>
           {label}{isLow ? " ⚠" : ""}
         </span>
       </div>
