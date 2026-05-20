@@ -177,14 +177,17 @@ export async function analyzeDenial(imageBase64, mediaType) {
 }
 
 // Plain-English summary + basic field extraction for the upload step preview
-export async function analyzePhoto(imageBase64, mediaType) {
+export async function analyzePhoto(imageBase64, mediaType, language = 'en') {
+  const langNote = language === 'es'
+    ? '\n\nIMPORTANT: Write the "plain_english" field in Spanish. Write it warmly and simply, as if speaking to a 75-year-old Spanish speaker.'
+    : ''
   const data = await callClaude({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     messages: [
       {
         role: 'user',
-        content: [fileContent(imageBase64, mediaType), { type: 'text', text: PHOTO_PROMPT }],
+        content: [fileContent(imageBase64, mediaType), { type: 'text', text: PHOTO_PROMPT + langNote }],
       },
     ],
   })
@@ -196,7 +199,10 @@ export async function analyzePhoto(imageBase64, mediaType) {
   return parsed
 }
 
-export async function analyzeMedicalBill(imageBase64, mediaType) {
+export async function analyzeMedicalBill(imageBase64, mediaType, language = 'en') {
+  const langNote = language === 'es'
+    ? '\n\nIMPORTANT: Write the "plain_english" field in Spanish. Write it warmly and simply, as if speaking to a 75-year-old Spanish speaker.'
+    : ''
   const data = await callClaude({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 2048,
@@ -205,7 +211,7 @@ export async function analyzeMedicalBill(imageBase64, mediaType) {
         role: 'user',
         content: [
           fileContent(imageBase64, mediaType),
-          { type: 'text', text: MEDICAL_BILL_PROMPT },
+          { type: 'text', text: MEDICAL_BILL_PROMPT + langNote },
         ],
       },
     ],

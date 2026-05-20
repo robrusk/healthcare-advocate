@@ -348,7 +348,7 @@ export default function InsuranceFighter() {
       setPhotoMediaType(file.type);
       setPhotoBase64Stored(base64);
       setPhotoMediaTypeStored(file.type);
-      const result = await analyzePhoto(base64, file.type);
+      const result = await analyzePhoto(base64, file.type, lang);
       setDocumentType(result.document_type || 'denial_letter');
       setPhotoSummary(result.plain_english);
       if (result.denial_reason) setDenialReason(result.denial_reason);
@@ -369,7 +369,7 @@ export default function InsuranceFighter() {
 
     if (documentType === 'medical_bill') {
       try {
-        const bill = await analyzeMedicalBill(photoBase64Stored, photoMediaTypeStored);
+        const bill = await analyzeMedicalBill(photoBase64Stored, photoMediaTypeStored, lang);
         setBillExtraction(bill);
       } catch {
         setBillExtraction({ line_items: [], missing_info: [], biller_error_detected: false, biller_error_description: null, plain_english: "Could not fully read this bill. Please review manually." });
