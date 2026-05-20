@@ -318,6 +318,13 @@ export default function InsuranceFighter() {
   const [photoBase64Stored, setPhotoBase64Stored] = useState(null);
   const [photoMediaTypeStored, setPhotoMediaTypeStored] = useState(null);
 
+  const [translatedLetter, setTranslatedLetter] = useState('');
+  const [translatingLetter, setTranslatingLetter] = useState(false);
+  const [showLetterTranslation, setShowLetterTranslation] = useState(false);
+  const [translatedBillingLetter, setTranslatedBillingLetter] = useState('');
+  const [translatingBillingLetter, setTranslatingBillingLetter] = useState(false);
+  const [showBillingTranslation, setShowBillingTranslation] = useState(false);
+
   useEffect(() => {
     setTimeout(() => setAnimateIn(true), 100);
   }, []);
@@ -618,6 +625,24 @@ INSTRUCTIONS:
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const translateLetter = async (text, setTranslated, setTranslating) => {
+    setTranslating(true)
+    try {
+      const result = await callClaude({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1200,
+        messages: [{
+          role: 'user',
+          content: `Translate this appeal letter to Spanish. Preserve all names, dates, claim numbers, dollar amounts, and legal citations exactly as written. Write only the translated letter — no preamble.\n\n${text}`,
+        }],
+      })
+      setTranslated(result.content.find(b => b.type === 'text')?.text || '')
+    } catch {
+      setTranslated('[Translation error — please try again]')
+    }
+    setTranslating(false)
+  }
+
   const reset = () => {
     setStep("upload");
     setDenialText("");
@@ -649,6 +674,12 @@ INSTRUCTIONS:
     setGeneratingBilling(false);
     setPhotoBase64Stored(null);
     setPhotoMediaTypeStored(null);
+    setTranslatedLetter('');
+    setTranslatingLetter(false);
+    setShowLetterTranslation(false);
+    setTranslatedBillingLetter('');
+    setTranslatingBillingLetter(false);
+    setShowBillingTranslation(false);
   };
 
   return (
@@ -1196,7 +1227,7 @@ INSTRUCTIONS:
                 <>
                   <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
                     <button
-                      onClick={() => setActiveBillingTab("itemized_request")}
+                      onClick={() => { setActiveBillingTab("itemized_request"); setTranslatedBillingLetter(''); setShowBillingTranslation(false); }}
                       style={{
                         flex: 1, padding: "10px 6px", cursor: "pointer", fontSize: 12,
                         fontFamily: "Georgia, serif", borderRadius: 8, transition: "all 0.2s",
@@ -1208,7 +1239,7 @@ INSTRUCTIONS:
                     >{tr('tabItemized', '📄 Itemized Bill Request')}</button>
                     {billExtraction?.biller_error_detected && (
                       <button
-                        onClick={() => setActiveBillingTab("biller_error_dispute")}
+                        onClick={() => { setActiveBillingTab("biller_error_dispute"); setTranslatedBillingLetter(''); setShowBillingTranslation(false); }}
                         style={{
                           flex: 1, padding: "10px 6px", cursor: "pointer", fontSize: 12,
                           fontFamily: "Georgia, serif", borderRadius: 8, transition: "all 0.2s",
@@ -1226,8 +1257,37 @@ INSTRUCTIONS:
                     borderRadius: 10, padding: 20, marginBottom: 16, maxHeight: 500, overflowY: "auto",
                   }}>
                     <pre style={{ fontFamily: "Georgia, serif", fontSize: 13, lineHeight: 1.7, color: "rgba(232,244,240,0.9)", whiteSpace: "pre-wrap", margin: 0 }}>
-                      {billingLetters[activeBillingTab] || ""}
+                      {showBillingTranslation ? translatedBillingLetter : (billingLetters[activeBillingTab] || "")}
                     </pre>
+                  </div>
+
+                  {/* Leer en Español / Read in English toggle */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                    <button
+                      onClick={async () => {
+                        if (!showBillingTranslation) {
+                          if (!translatedBillingLetter) {
+                            await translateLetter(billingLetters[activeBillingTab], setTranslatedBillingLetter, setTranslatingBillingLetter)
+                          }
+                          setShowBillingTranslation(true)
+                        } else {
+                          setShowBillingTranslation(false)
+                        }
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid rgba(0,229,160,0.25)',
+                        borderRadius: 6, padding: '6px 16px', cursor: 'pointer',
+                        color: 'rgba(0,229,160,0.6)', fontSize: 12, fontFamily: 'monospace',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {translatingBillingLetter
+                        ? tr('translatingLetter', 'Translating...')
+                        : showBillingTranslation
+                          ? tr('readInEnglish', '🌐 Read in English')
+                          : tr('readInSpanish', '🌐 Leer en Español')}
+                    </button>
                   </div>
 
                   <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
@@ -1285,7 +1345,7 @@ INSTRUCTIONS:
                     ].map((tab) => (
                       <button
                         key={tab.id}
-                        onClick={() => { setActiveTab(tab.id); setLetterDone(false); }}
+                        onClick={() => { setActiveTab(tab.id); setLetterDone(false); setTranslatedLetter(''); setShowLetterTranslation(false); }}
                         style={{
                           flex: 1, padding: "10px 6px", cursor: "pointer", fontSize: 12,
                           fontFamily: "Georgia, serif", borderRadius: 8, transition: "all 0.2s",
@@ -1304,10 +1364,41 @@ INSTRUCTIONS:
                     borderRadius: 10, padding: 20, marginBottom: 16, maxHeight: 500, overflowY: "auto",
                   }}>
                     <pre style={{ fontFamily: "Georgia, serif", fontSize: 13, lineHeight: 1.7, color: "rgba(232,244,240,0.9)", whiteSpace: "pre-wrap", margin: 0 }}>
-                      {letterDone
-                        ? letters[activeTab]
-                        : <TypewriterText key={activeTab} text={letters[activeTab]} speed={8} onDone={() => setLetterDone(true)} />}
+                      {showLetterTranslation
+                        ? translatedLetter
+                        : letterDone
+                          ? letters[activeTab]
+                          : <TypewriterText key={activeTab} text={letters[activeTab]} speed={8} onDone={() => setLetterDone(true)} />}
                     </pre>
+                  </div>
+
+                  {/* Leer en Español / Read in English toggle */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                    <button
+                      onClick={async () => {
+                        if (!showLetterTranslation) {
+                          if (!translatedLetter) {
+                            await translateLetter(letters[activeTab], setTranslatedLetter, setTranslatingLetter)
+                          }
+                          setShowLetterTranslation(true)
+                        } else {
+                          setShowLetterTranslation(false)
+                        }
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid rgba(0,229,160,0.25)',
+                        borderRadius: 6, padding: '6px 16px', cursor: 'pointer',
+                        color: 'rgba(0,229,160,0.6)', fontSize: 12, fontFamily: 'monospace',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {translatingLetter
+                        ? tr('translatingLetter', 'Translating...')
+                        : showLetterTranslation
+                          ? tr('readInEnglish', '🌐 Read in English')
+                          : tr('readInSpanish', '🌐 Leer en Español')}
+                    </button>
                   </div>
 
                   <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
