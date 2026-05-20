@@ -1,4 +1,7 @@
-export function FactsUsedCard({ citations }) {
+import es from '../i18n/es'
+
+export function FactsUsedCard({ citations, lang = 'en' }) {
+  const tr = (key, english) => (lang === 'es' && es[key]) ? es[key] : english
   if (!citations || citations.length === 0) return null
 
   return (
@@ -10,10 +13,10 @@ export function FactsUsedCard({ citations }) {
       marginBottom: 16,
     }}>
       <div style={{ fontSize: 11, letterSpacing: 2, color: "#00e5a0", fontFamily: "monospace", marginBottom: 10 }}>
-        🛡️ VERIFIED SOURCES USED
+        {tr('verifiedSourcesTitle', '🛡️ VERIFIED SOURCES USED')}
       </div>
       <p style={{ fontSize: 13, color: "rgba(232,244,240,0.65)", fontFamily: "monospace", marginBottom: 14, lineHeight: 1.5 }}>
-        To prevent mistakes, this appeal was written using the following official rules:
+        {tr('verifiedSourcesBody', 'To prevent mistakes, this appeal was written using the following official rules:')}
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -36,7 +39,7 @@ export function FactsUsedCard({ citations }) {
       </div>
 
       <p style={{ fontSize: 11, color: "rgba(0,229,160,0.5)", fontFamily: "monospace", marginTop: 14, marginBottom: 0 }}>
-        No private data left your device to look up these rules.
+        {tr('verifiedSourcesFooter', 'No private data left your device to look up these rules.')}
       </p>
     </div>
   )
