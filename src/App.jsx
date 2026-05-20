@@ -324,12 +324,17 @@ export default function InsuranceFighter() {
 
   const currentSteps = documentType === 'medical_bill'
     ? [
-        { id: "upload", label: "Scan Bill", icon: "📄" },
-        { id: "analyze", label: "AI Analysis", icon: "🔍" },
-        { id: "bill_review", label: "Bill Review", icon: "🧾" },
-        { id: "bill_letters", label: "Dispute Letters", icon: "✉️" },
+        { id: "upload", label: tr('stepScanBill', 'Scan Bill'), icon: "📄" },
+        { id: "analyze", label: tr('stepAnalysis', 'AI Analysis'), icon: "🔍" },
+        { id: "bill_review", label: tr('stepBillReview', 'Bill Review'), icon: "🧾" },
+        { id: "bill_letters", label: tr('stepDisputeLetters', 'Dispute Letters'), icon: "✉️" },
       ]
-    : STEPS;
+    : [
+        { id: "upload", label: tr('stepUpload', 'Scan Denial'), icon: "📄" },
+        { id: "analyze", label: tr('stepAnalysis', 'AI Analysis'), icon: "🔍" },
+        { id: "strategy", label: tr('stepStrategy', 'Battle Plan'), icon: "⚔️" },
+        { id: "letter", label: tr('stepLetter', 'Appeal Letter'), icon: "✉️" },
+      ];
   const stepIndex = currentSteps.findIndex((s) => s.id === step);
 
   const handlePhoto = async (e) => {
@@ -672,10 +677,10 @@ INSTRUCTIONS:
             🛡️ healthcareadvocate.org
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 8px", lineHeight: 1.2, letterSpacing: -0.5 }}>
-            We're on your side.
+            {tr('tagline', "We're on your side.")}
           </h1>
           <p style={{ color: "rgba(232,244,240,0.55)", fontSize: 14, margin: 0, fontFamily: "monospace", letterSpacing: 0.5 }}>
-            Free help fighting insurance denials and surprise medical bills.
+            {tr('subheadline', 'Free help fighting insurance denials and surprise medical bills.')}
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 0, marginTop: 14 }}>
             {['en', 'es'].map((l) => (
@@ -747,10 +752,12 @@ INSTRUCTIONS:
                   }}>
                     <div style={{ fontSize: 22, textAlign: "center" }}>⚔️</div>
                     <h2 style={{ fontSize: 17, fontWeight: 800, color: "#ff6060", margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
-                      Fight a Denial
+                      {tr('denialCardTitle', 'Fight a Denial')}
                     </h2>
                     <p style={{ fontSize: 13, color: "rgba(232,244,240,0.7)", lineHeight: 1.5, margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
-                      Insurance denied your claim?<br/>You have a deadline.<br/>Let's fight back.
+                      {tr('denialCardBody', 'Insurance denied your claim?').split('\n').map((line, i, arr) => (
+                        <span key={i}>{line}{i < arr.length - 1 && <br/>}</span>
+                      ))}
                     </p>
                     <label
                       htmlFor="unified-file-input"
@@ -764,7 +771,7 @@ INSTRUCTIONS:
                         boxShadow: "0 0 16px rgba(255,60,60,0.3)",
                       }}
                     >
-                      📷 Snap or Upload Denial Letter
+                      {tr('denialCardButton', '📷 Snap or Upload Denial Letter')}
                     </label>
                   </div>
 
@@ -778,10 +785,10 @@ INSTRUCTIONS:
                   }}>
                     <div style={{ fontSize: 22, textAlign: "center" }}>🧾</div>
                     <h2 style={{ fontSize: 17, fontWeight: 800, color: "#00e5a0", margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
-                      Review a Bill
+                      {tr('billCardTitle', 'Review a Bill')}
                     </h2>
                     <p style={{ fontSize: 13, color: "rgba(232,244,240,0.7)", lineHeight: 1.5, margin: 0, textAlign: "center", fontFamily: "Georgia, serif" }}>
-                      Got a medical bill? Don't pay until we check it.
+                      {tr('billCardBody', "Got a medical bill? Don't pay until we check it.")}
                     </p>
                     <label
                       htmlFor="unified-file-input"
@@ -795,7 +802,7 @@ INSTRUCTIONS:
                         boxShadow: "0 0 16px rgba(0,229,160,0.2)",
                       }}
                     >
-                      📷 Snap or Upload Medical Bill
+                      {tr('billCardButton', '📷 Snap or Upload Medical Bill')}
                     </label>
                   </div>
                 </div>
@@ -811,7 +818,7 @@ INSTRUCTIONS:
                       fontFamily: "monospace", textDecoration: "underline",
                     }}
                   >
-                    Not sure what you have? Tap here and we'll figure it out.
+                    {tr('fallbackLink', "Not sure what you have? Tap here and we'll figure it out.")}
                   </label>
                 </p>
 
@@ -821,22 +828,22 @@ INSTRUCTIONS:
                   paddingTop: 20,
                 }}>
                   <div style={{ fontSize: 12, letterSpacing: 2, color: "rgba(232,244,240,0.35)", fontFamily: "monospace", marginBottom: 12 }}>
-                    📖 WHY THIS EXISTS
+                    {tr('whyHeading', '📖 WHY THIS EXISTS')}
                   </div>
                   <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
-                    This site was built by a caregiver who watched his parents — and too many other families — get buried under denial letters and confusing medical bills they didn't have the time, energy, or expertise to fight.
+                    {tr('whyP1', "This site was built by a caregiver who watched his parents — and too many other families — get buried under denial letters and confusing medical bills they didn't have the time, energy, or expertise to fight.")}
                   </p>
                   <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
-                    The healthcare system bets on you giving up. Most people do. The success rate when patients actually appeal denials is around 50% — but only about 1% of denials ever get appealed.
+                    {tr('whyP2', 'The healthcare system bets on you giving up. Most people do. The success rate when patients actually appeal denials is around 50% — but only about 1% of denials ever get appealed.')}
                   </p>
                   <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
-                    This tool exists to close that gap. It's free, run as a volunteer project, not a business. No ads. No upsells. No subscriptions. If it helps you, share it with someone else who needs it.
+                    {tr('whyP3', "This tool exists to close that gap. It's free, run as a volunteer project, not a business. No ads. No upsells. No subscriptions. If it helps you, share it with someone else who needs it.")}
                   </p>
                   <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.4)", fontFamily: "Georgia, serif", fontStyle: "italic", margin: "0 0 16px" }}>
-                    Built by a real person who's been there. Not legal advice — but a real place to start.
+                    {tr('whyItalic', "Built by a real person who's been there. Not legal advice — but a real place to start.")}
                   </p>
                   <a href="/privacy.html" style={{ fontSize: 12, color: "rgba(0,229,160,0.5)", textDecoration: "none", display: "block", textAlign: "center", letterSpacing: 1 }}>
-                    🔒 Your privacy — how we handle your data
+                    {tr('privacyLink', '🔒 Your privacy — how we handle your data')}
                   </a>
                 </div>
               </div>
@@ -853,15 +860,15 @@ INSTRUCTIONS:
                   {/* Who is submitting */}
                   <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "14px 16px" }}>
                     <div style={{ fontSize: 11, letterSpacing: 2, color: "#00e5a0", fontFamily: "monospace", marginBottom: 12 }}>
-                      {documentType === 'medical_bill' ? 'WHO IS HANDLING THIS?' : 'WHO IS SUBMITTING THIS APPEAL?'}
+                      {documentType === 'medical_bill' ? tr('whoHandlingBill', 'WHO IS HANDLING THIS?') : tr('whoSubmittingDenial', 'WHO IS SUBMITTING THIS APPEAL?')}
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
                       {[
-                        { id: "patient", label: "The Patient" },
-                        { id: "spouse", label: "Spouse / Partner" },
-                        { id: "adult_child", label: "Adult Child" },
-                        { id: "family", label: "Other Family" },
-                        { id: "advocate", label: "Caregiver / Advocate" },
+                        { id: "patient", label: tr('relPatient', 'The Patient') },
+                        { id: "spouse", label: tr('relSpouse', 'Spouse / Partner') },
+                        { id: "adult_child", label: tr('relAdultChild', 'Adult Child') },
+                        { id: "family", label: tr('relFamily', 'Other Family') },
+                        { id: "advocate", label: tr('relAdvocate', 'Caregiver / Advocate') },
                       ].map((r) => (
                         <button key={r.id} onClick={() => setSubmitterRelationship(r.id)} style={{
                           background: submitterRelationship === r.id ? "rgba(0,229,160,0.15)" : "rgba(255,255,255,0.03)",
@@ -873,11 +880,11 @@ INSTRUCTIONS:
                       ))}
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                      <Field label="Your Name" value={submitterName} onChange={setSubmitterName} placeholder="Jane Smith" />
-                      <Field label="Your Phone" value={submitterPhone} onChange={setSubmitterPhone} placeholder="(555) 000-0000" />
+                      <Field label={tr('labelYourName', 'Your Name')} value={submitterName} onChange={setSubmitterName} placeholder="Jane Smith" />
+                      <Field label={tr('labelYourPhone', 'Your Phone')} value={submitterPhone} onChange={setSubmitterPhone} placeholder="(555) 000-0000" />
                     </div>
                     <div style={{ marginTop: 10 }}>
-                      <Field label="Your Email" value={submitterEmail} onChange={setSubmitterEmail} placeholder="jane@email.com" />
+                      <Field label={tr('labelYourEmail', 'Your Email')} value={submitterEmail} onChange={setSubmitterEmail} placeholder="jane@email.com" />
                     </div>
                   </div>
 
@@ -886,7 +893,7 @@ INSTRUCTIONS:
                     <div style={{ textAlign: "center", padding: "16px 0", background: "rgba(0,229,160,0.06)", borderRadius: 10, border: "1px solid rgba(0,229,160,0.15)" }}>
                       <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
                       <p style={{ fontFamily: "monospace", fontSize: 13, color: "#00e5a0", margin: 0 }}>
-                        {documentType === 'medical_bill' ? 'Reading your bill...' : 'Reading your letter...'}
+                        {documentType === 'medical_bill' ? tr('readingBill', 'Reading your bill...') : tr('readingLetter', 'Reading your letter...')}
                       </p>
                     </div>
                   )}
@@ -895,13 +902,13 @@ INSTRUCTIONS:
                   {photoSummary && !photoReading && (
                     <div style={{ background: "rgba(0,229,160,0.08)", border: "1px solid rgba(0,229,160,0.25)", borderRadius: 10, padding: "14px 16px" }}>
                       <div style={{ fontSize: 11, letterSpacing: 2, color: "#00e5a0", fontFamily: "monospace", marginBottom: 8 }}>
-                        {documentType === 'medical_bill' ? '📋 WHAT THIS BILL IS FOR' : '📋 WHAT YOUR LETTER SAYS'}
+                        {documentType === 'medical_bill' ? tr('whatBillIsFor', '📋 WHAT THIS BILL IS FOR') : tr('whatLetterSays', '📋 WHAT YOUR LETTER SAYS')}
                       </div>
                       <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(232,244,240,0.9)", margin: "0 0 8px" }}>{photoSummary}</p>
                       <p style={{ fontSize: 11, color: "rgba(232,244,240,0.4)", fontFamily: "monospace", margin: 0 }}>
                         {documentType === 'medical_bill'
-                          ? 'Fields below were filled in from your bill — review and correct anything that looks wrong.'
-                          : 'Fields below were filled in from your letter — review and correct anything that looks wrong.'}
+                          ? tr('fieldsFromBill', 'Fields below were filled in from your bill — review and correct anything that looks wrong.')
+                          : tr('fieldsFromLetter', 'Fields below were filled in from your letter — review and correct anything that looks wrong.')}
                       </p>
                     </div>
                   )}
@@ -910,17 +917,17 @@ INSTRUCTIONS:
                   {documentType !== 'medical_bill' && (
                     <>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                        <Field label="Patient Name" value={patientName} onChange={setPatientName} placeholder="Jane Smith" />
-                        <Field label="Claim Number" value={claimNumber} onChange={setClaimNumber} placeholder="CLM-2024-XXXXX" />
+                        <Field label={tr('labelPatientName', 'Patient Name')} value={patientName} onChange={setPatientName} placeholder="Jane Smith" />
+                        <Field label={tr('labelClaimNumber', 'Claim Number')} value={claimNumber} onChange={setClaimNumber} placeholder="CLM-2024-XXXXX" />
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                        <Field label="Insurance Company" value={insurerName} onChange={setInsurerName} placeholder="UnitedHealth, Cigna..." />
-                        <Field label="Treatment / Service" value={treatment} onChange={setTreatment} placeholder="MRI, Surgery, Therapy..." />
+                        <Field label={tr('labelInsuranceCompany', 'Insurance Company')} value={insurerName} onChange={setInsurerName} placeholder="UnitedHealth, Cigna..." />
+                        <Field label={tr('labelTreatment', 'Treatment / Service')} value={treatment} onChange={setTreatment} placeholder="MRI, Surgery, Therapy..." />
                       </div>
 
                       <div>
                         <label style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#00e5a0", fontFamily: "monospace", display: "block", marginBottom: 8 }}>
-                          Denial Reason *
+                          {tr('labelDenialReason', 'Denial Reason *')}
                         </label>
                         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                           {DENY_REASONS.map((r) => (
@@ -945,12 +952,12 @@ INSTRUCTIONS:
 
                       <div>
                         <label style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#00e5a0", fontFamily: "monospace", display: "block", marginBottom: 8 }}>
-                          Paste Denial Letter Text (optional)
+                          {tr('labelPasteLetter', 'Paste Denial Letter Text (optional)')}
                         </label>
                         <textarea
                           value={denialText}
                           onChange={(e) => setDenialText(e.target.value)}
-                          placeholder="Paste the text from your denial letter here for better analysis..."
+                          placeholder={tr('pastePlaceholder', 'Paste the text from your denial letter here for better analysis...')}
                           rows={4}
                           style={{
                             width: "100%", background: "#1a2535", border: "1px solid rgba(255,255,255,0.1)",
@@ -975,7 +982,7 @@ INSTRUCTIONS:
                       boxShadow: (documentType === 'medical_bill' || denialReason) ? "0 0 30px rgba(0,229,160,0.3)" : "none",
                     }}
                   >
-                    {documentType === 'medical_bill' ? '🔍 Analyze This Bill →' : '🔍 Analyze My Denial →'}
+                    {documentType === 'medical_bill' ? tr('analyzeBillBtn', '🔍 Analyze This Bill →') : tr('analyzeDenialBtn', '🔍 Analyze My Denial →')}
                   </button>
                 </div>
               </Card>
@@ -984,10 +991,10 @@ INSTRUCTIONS:
         )}
 
         {step === "analyze" && analyzing && (
-          <Card title="🤖 Scanning Denial..." subtitle="Reading between the lines">
+          <Card title={tr('scanningTitle', '🤖 Scanning Denial...')} subtitle={tr('scanningSubtitle', 'Reading between the lines')}>
             <div style={{ textAlign: "center", padding: "32px 0" }}>
               <div style={{ fontSize: 48, marginBottom: 24, animation: "spin 2s linear infinite" }}>⚙️</div>
-              {["Identifying denial type...", "Locating applicable laws...", "Finding insurance AI weaknesses...", "Building your battle plan..."].map((msg, i) => (
+              {[tr('scanMsg1', 'Identifying denial type...'), tr('scanMsg2', 'Locating applicable laws...'), tr('scanMsg3', 'Finding insurance AI weaknesses...'), tr('scanMsg4', 'Building your battle plan...')].map((msg, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, justifyContent: "center" }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#00e5a0", animation: `pulse ${0.5 + i * 0.3}s ease infinite alternate` }} />
                   <span style={{ fontFamily: "monospace", fontSize: 13, color: "rgba(232,244,240,0.7)" }}>{msg}</span>
