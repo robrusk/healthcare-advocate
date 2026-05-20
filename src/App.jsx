@@ -48,6 +48,7 @@ import { lookupVerifiedFacts } from "./library/index";
 import { FactsUsedCard } from "./components/FactsUsedCard";
 import BillReviewScreen from "./components/BillReviewScreen";
 import { downloadAppealReminder } from "./lib/calendar";
+import es from "./i18n/es";
 
 const WORKER_URL = 'https://icy-silence-e717.rob-3ea.workers.dev/';
 
@@ -281,6 +282,8 @@ const APPEAL_LEVEL_LABELS = {
 
 export default function InsuranceFighter() {
   const [step, setStep] = useState("upload");
+  const [lang, setLang] = useState('en');
+  const tr = (key, english) => (lang === 'es' && es[key]) ? es[key] : english;
   const [denialText, setDenialText] = useState("");
   const [denialReason, setDenialReason] = useState("");
   const [submitterName, setSubmitterName] = useState("");
@@ -674,6 +677,23 @@ INSTRUCTIONS:
           <p style={{ color: "rgba(232,244,240,0.55)", fontSize: 14, margin: 0, fontFamily: "monospace", letterSpacing: 0.5 }}>
             Free help fighting insurance denials and surprise medical bills.
           </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 0, marginTop: 14 }}>
+            {['en', 'es'].map((l) => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                style={{
+                  background: lang === l ? 'rgba(0,229,160,0.15)' : 'transparent',
+                  border: `1px solid ${lang === l ? '#00e5a0' : 'rgba(255,255,255,0.12)'}`,
+                  borderRadius: l === 'en' ? '6px 0 0 6px' : '0 6px 6px 0',
+                  padding: '5px 14px', cursor: 'pointer',
+                  color: lang === l ? '#00e5a0' : 'rgba(232,244,240,0.4)',
+                  fontSize: 12, fontFamily: 'monospace', fontWeight: lang === l ? 700 : 400,
+                  transition: 'all 0.2s',
+                }}
+              >{l.toUpperCase()}</button>
+            ))}
+          </div>
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 0, marginBottom: 32, opacity: (animateIn && (step !== 'upload' || photoSummary || photoReading)) ? 1 : 0, transition: "opacity 1s ease 0.3s", pointerEvents: (step === 'upload' && !photoSummary && !photoReading) ? 'none' : 'auto' }}>
@@ -812,9 +832,12 @@ INSTRUCTIONS:
                   <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.55)", fontFamily: "Georgia, serif", margin: "0 0 12px" }}>
                     This tool exists to close that gap. It's free, run as a volunteer project, not a business. No ads. No upsells. No subscriptions. If it helps you, share it with someone else who needs it.
                   </p>
-                  <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.4)", fontFamily: "Georgia, serif", fontStyle: "italic", margin: 0 }}>
+                  <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.4)", fontFamily: "Georgia, serif", fontStyle: "italic", margin: "0 0 16px" }}>
                     Built by a real person who's been there. Not legal advice — but a real place to start.
                   </p>
+                  <a href="/privacy.html" style={{ fontSize: 12, color: "rgba(0,229,160,0.5)", textDecoration: "none", display: "block", textAlign: "center", letterSpacing: 1 }}>
+                    🔒 Your privacy — how we handle your data
+                  </a>
                 </div>
               </div>
             )}
@@ -980,6 +1003,7 @@ INSTRUCTIONS:
               bill={billExtraction}
               onGenerate={generateBillingLetters}
               onSwitch={() => { setDocumentType('denial_letter'); setStep('upload'); }}
+              lang={lang}
             />
           </div>
         )}
@@ -1244,7 +1268,7 @@ INSTRUCTIONS:
 
               {!generating && letters.insurance && (
                 <>
-                  <FactsUsedCard citations={visibleCitations} />
+                  <FactsUsedCard citations={visibleCitations} lang={lang} />
                   {/* Tabs */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
                     {[
