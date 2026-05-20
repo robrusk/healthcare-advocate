@@ -1020,13 +1020,13 @@ INSTRUCTIONS:
 
             {/* Editable confirmation card */}
             {confirmedExtraction && (
-              <Card title="📋 Confirm What We Found" subtitle="Fix anything that looks wrong before we draft your letters">
+              <Card title={tr('confirmTitle', '📋 Confirm What We Found')} subtitle={tr('confirmSubtitle', 'Fix anything that looks wrong before we draft your letters')}>
 
                 {/* Plan Type — most critical field */}
                 <ConfirmField
-                  icon="🏥" label="Plan Type" critical
+                  icon="🏥" label={tr('labelPlanType', 'Plan Type')} critical
                   conf={denialExtraction?.confidence?.plan_type || "low"}
-                  hint="This determines which laws protect you. Please confirm."
+                  hint={tr('planTypeHint', 'This determines which laws protect you. Please confirm.')}
                 >
                   <select value={confirmedExtraction.plan_type || "unclear"}
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, plan_type: e.target.value })}
@@ -1038,7 +1038,7 @@ INSTRUCTIONS:
                 </ConfirmField>
 
                 {/* Denial Reason */}
-                <ConfirmField icon="⚖️" label="Denial Reason" conf={denialExtraction?.confidence?.denial_reason || "low"}>
+                <ConfirmField icon="⚖️" label={tr('labelDenialReasonConf', 'Denial Reason')} conf={denialExtraction?.confidence?.denial_reason || "low"}>
                   <select value={confirmedExtraction.denial_reason || "other"}
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, denial_reason: e.target.value })}
                     style={selectStyle}>
@@ -1049,7 +1049,7 @@ INSTRUCTIONS:
                 </ConfirmField>
 
                 {/* Appeal Level */}
-                <ConfirmField icon="🎯" label="Appeal Level" conf={denialExtraction?.confidence?.appeal_level || "high"}>
+                <ConfirmField icon="🎯" label={tr('labelAppealLevel', 'Appeal Level')} conf={denialExtraction?.confidence?.appeal_level || "high"}>
                   <select value={confirmedExtraction.appeal_level || "unclear"}
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, appeal_level: e.target.value })}
                     style={selectStyle}>
@@ -1060,14 +1060,14 @@ INSTRUCTIONS:
                 </ConfirmField>
 
                 {/* Appeal Deadline */}
-                <ConfirmField icon="📅" label="Appeal Deadline" conf={denialExtraction?.confidence?.appeal_deadline || "low"}>
+                <ConfirmField icon="📅" label={tr('labelAppealDeadline', 'Appeal Deadline')} conf={denialExtraction?.confidence?.appeal_deadline || "low"}>
                   <input type="date" value={confirmedExtraction.appeal_deadline || ""}
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, appeal_deadline: e.target.value })}
                     style={inputStyle} />
                 </ConfirmField>
 
                 {/* Insurer */}
-                <ConfirmField icon="🏢" label="Insurance Company" conf="high">
+                <ConfirmField icon="🏢" label={tr('labelInsurerConf', 'Insurance Company')} conf="high">
                   <input type="text" value={confirmedExtraction.insurer_name || ""}
                     placeholder="Insurance company name"
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, insurer_name: e.target.value })}
@@ -1075,7 +1075,7 @@ INSTRUCTIONS:
                 </ConfirmField>
 
                 {/* Service */}
-                <ConfirmField icon="💊" label="Service / Treatment Denied" conf="high">
+                <ConfirmField icon="💊" label={tr('labelServiceDenied', 'Service / Treatment Denied')} conf="high">
                   <input type="text" value={confirmedExtraction.service_denied || ""}
                     placeholder="What was denied?"
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, service_denied: e.target.value })}
@@ -1083,7 +1083,7 @@ INSTRUCTIONS:
                 </ConfirmField>
 
                 {/* State */}
-                <ConfirmField icon="📍" label="State" conf={denialExtraction?.confidence?.state || "low"}>
+                <ConfirmField icon="📍" label={tr('labelState', 'State')} conf={denialExtraction?.confidence?.state || "low"}>
                   <select value={confirmedExtraction.state || ""}
                     onChange={(e) => setConfirmedExtraction({ ...confirmedExtraction, state: e.target.value })}
                     style={selectStyle}>
@@ -1095,31 +1095,31 @@ INSTRUCTIONS:
                 </ConfirmField>
 
                 <p style={{ fontSize: 11, color: "rgba(255,215,0,0.4)", fontFamily: "monospace", marginTop: 4 }}>
-                  ⚠ yellow fields had low confidence — please review before continuing.
+                  {tr('lowConfWarning', '⚠ yellow fields had low confidence — please review before continuing.')}
                 </p>
               </Card>
             )}
 
             {/* Battle plan */}
-            <Card title="⚔️ Your Battle Plan" subtitle={`Win rate on appeal: ${analysisResult.winRate}`}>
+            <Card title={tr('battlePlanTitle', '⚔️ Your Battle Plan')} subtitle={`Win rate on appeal: ${analysisResult.winRate}`}>
               <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(0,229,160,0.08)", borderRadius: 10, border: "1px solid rgba(0,229,160,0.2)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontFamily: "monospace", fontSize: 12, color: "#00e5a0" }}>APPEAL SUCCESS PROBABILITY</span>
+                  <span style={{ fontFamily: "monospace", fontSize: 12, color: "#00e5a0" }}>{tr('appealSuccessLabel', 'APPEAL SUCCESS PROBABILITY')}</span>
                   <span style={{ fontFamily: "monospace", fontSize: 12, color: "#00e5a0", fontWeight: 700 }}>{analysisResult.winRate}</span>
                 </div>
                 <ProgressBar value={parseInt(analysisResult.winRate)} />
                 <div style={{ fontSize: 11, color: "rgba(232,244,240,0.4)", marginTop: 6, fontFamily: "monospace" }}>
-                  Timeline: {analysisResult.timeline}
+                  {tr('timelineLabel', 'Timeline:')} {analysisResult.timeline}
                 </div>
               </div>
 
               <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(255,60,60,0.06)", borderRadius: 10, border: "1px solid rgba(255,60,60,0.15)" }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: "#ff6060", fontFamily: "monospace", marginBottom: 8 }}>HOW THEIR AI WORKS AGAINST YOU</div>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#ff6060", fontFamily: "monospace", marginBottom: 8 }}>{tr('howTheirAI', 'HOW THEIR AI WORKS AGAINST YOU')}</div>
                 <p style={{ fontSize: 14, lineHeight: 1.6, color: "rgba(232,244,240,0.8)", margin: 0 }}>{analysisResult.strategy}</p>
               </div>
 
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: "#00e5a0", fontFamily: "monospace", marginBottom: 10 }}>🔑 MAGIC KEYWORDS (use these in your appeal)</div>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#00e5a0", fontFamily: "monospace", marginBottom: 10 }}>{tr('magicKeywords', '🔑 MAGIC KEYWORDS (use these in your appeal)')}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {analysisResult.powerWords.map((word) => (
                     <span key={word} style={{
@@ -1131,7 +1131,7 @@ INSTRUCTIONS:
               </div>
 
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 10 }}>⚖️ LAWS PROTECTING YOU</div>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 10 }}>{tr('lawsProtecting', '⚖️ LAWS PROTECTING YOU')}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {analysisResult.laws.map((law) => (
                     <div key={law} style={{ fontFamily: "monospace", fontSize: 13, color: "rgba(255,215,0,0.8)", paddingLeft: 12, borderLeft: "2px solid rgba(255,215,0,0.3)" }}>
@@ -1142,7 +1142,7 @@ INSTRUCTIONS:
               </div>
 
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: "#e8f4f0", fontFamily: "monospace", marginBottom: 10 }}>📋 ACTION STEPS (do these NOW)</div>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#e8f4f0", fontFamily: "monospace", marginBottom: 10 }}>{tr('actionSteps', '📋 ACTION STEPS (do these NOW)')}</div>
                 {analysisResult.tactics.map((tactic, i) => (
                   <div key={i} style={{
                     display: "flex", gap: 12, marginBottom: 10, padding: "10px 12px",
@@ -1164,7 +1164,7 @@ INSTRUCTIONS:
                   boxShadow: "0 0 30px rgba(255,60,60,0.3)",
                 }}
               >
-                ✉️ Looks Right — Draft My Appeal →
+                {tr('draftLetterBtn', '✉️ Looks Right — Draft My Appeal →')}
               </button>
             </Card>
           </div>
@@ -1179,16 +1179,16 @@ INSTRUCTIONS:
               boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
             }}>
               <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                <h2 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700 }}>✉️ Your Dispute Letters</h2>
+                <h2 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700 }}>{tr('disputeLettersTitle', '✉️ Your Dispute Letters')}</h2>
                 <p style={{ margin: 0, fontSize: 12, color: "rgba(232,244,240,0.45)", fontFamily: "monospace" }}>
-                  Ready to send — review and edit before mailing
+                  {tr('disputeLettersSubtitle', 'Ready to send — review and edit before mailing')}
                 </p>
               </div>
 
               {generatingBilling && (
                 <div style={{ textAlign: "center", padding: "32px 0" }}>
                   <div style={{ fontSize: 40, marginBottom: 16 }}>✍️</div>
-                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>Writing your dispute letters...</p>
+                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>{tr('generatingBillingLetters', 'Writing your dispute letters...')}</p>
                 </div>
               )}
 
@@ -1205,7 +1205,7 @@ INSTRUCTIONS:
                         color: activeBillingTab === "itemized_request" ? "#00e5a0" : "rgba(232,244,240,0.5)",
                         fontWeight: activeBillingTab === "itemized_request" ? 700 : 400,
                       }}
-                    >📄 Itemized Bill Request</button>
+                    >{tr('tabItemized', '📄 Itemized Bill Request')}</button>
                     {billExtraction?.biller_error_detected && (
                       <button
                         onClick={() => setActiveBillingTab("biller_error_dispute")}
@@ -1217,7 +1217,7 @@ INSTRUCTIONS:
                           color: activeBillingTab === "biller_error_dispute" ? "#ff6060" : "rgba(232,244,240,0.5)",
                           fontWeight: activeBillingTab === "biller_error_dispute" ? 700 : 400,
                         }}
-                      >🚨 Billing Error Dispute</button>
+                      >{tr('tabBillerError', '🚨 Billing Error Dispute')}</button>
                     )}
                   </div>
 
@@ -1238,7 +1238,7 @@ INSTRUCTIONS:
                         borderRadius: 8, padding: "12px 16px", cursor: "pointer",
                         color: "#00e5a0", fontSize: 14, fontFamily: "Georgia, serif",
                       }}
-                    >📋 Copy Letter</button>
+                    >{tr('copyBillingLetter', '📋 Copy Letter')}</button>
                     <button
                       onClick={generateBillingLetters}
                       style={{
@@ -1246,7 +1246,7 @@ INSTRUCTIONS:
                         borderRadius: 8, padding: "12px 16px", cursor: "pointer",
                         color: "rgba(232,244,240,0.6)", fontSize: 14, fontFamily: "Georgia, serif",
                       }}
-                    >🔄 Regenerate</button>
+                    >{tr('regenerateBilling', '🔄 Regenerate')}</button>
                   </div>
                 </>
               )}
@@ -1256,7 +1256,7 @@ INSTRUCTIONS:
                 border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "12px",
                 cursor: "pointer", color: "rgba(232,244,240,0.4)", fontSize: 13, fontFamily: "Georgia, serif",
               }}>
-                ← Start Over
+                {tr('startOver', '← Start Over')}
               </button>
             </div>
           </div>
@@ -1264,12 +1264,12 @@ INSTRUCTIONS:
 
         {step === "letter" && (
           <div style={{ animation: "fadeSlideIn 0.5s ease" }}>
-            <Card title="✉️ Your Letters" subtitle="Three letters ready to send — tap a tab to switch">
+            <Card title={tr('lettersTitle', '✉️ Your Letters')} subtitle={tr('lettersSubtitle', 'Three letters ready to send — tap a tab to switch')}>
               {generating && (
                 <div style={{ textAlign: "center", padding: "32px 0" }}>
                   <div style={{ fontSize: 40, marginBottom: 16 }}>✍️</div>
-                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>Writing all three letters at once...</p>
-                  <p style={{ fontFamily: "monospace", color: "rgba(232,244,240,0.4)", fontSize: 12 }}>Insurance appeal · Hospital · Doctor</p>
+                  <p style={{ fontFamily: "monospace", color: "#00e5a0", fontSize: 14 }}>{tr('generatingLetters', 'Writing all three letters at once...')}</p>
+                  <p style={{ fontFamily: "monospace", color: "rgba(232,244,240,0.4)", fontSize: 12 }}>{tr('generatingLettersSub', 'Insurance appeal · Hospital · Doctor')}</p>
                 </div>
               )}
 
@@ -1279,9 +1279,9 @@ INSTRUCTIONS:
                   {/* Tabs */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
                     {[
-                      { id: "insurance", label: "🏛 Insurance Appeal" },
-                      { id: "hospital", label: "🏥 Hospital" },
-                      { id: "doctor", label: "👨‍⚕️ Doctor" },
+                      { id: "insurance", label: tr('tabInsurance', '🏛 Insurance Appeal') },
+                      { id: "hospital", label: tr('tabHospital', '🏥 Hospital') },
+                      { id: "doctor", label: tr('tabDoctor', '👨‍⚕️ Doctor') },
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -1316,14 +1316,14 @@ INSTRUCTIONS:
                       border: "1px solid #00e5a0", borderRadius: 8, padding: "12px 16px", cursor: "pointer",
                       color: "#00e5a0", fontSize: 14, fontFamily: "Georgia, serif", transition: "all 0.2s",
                     }}>
-                      {copied ? "✓ Copied!" : "📋 Copy Letter"}
+                      {copied ? tr('copied', '✓ Copied!') : tr('copyLetter', '📋 Copy Letter')}
                     </button>
                     <button onClick={generateLetter} style={{
                       flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)",
                       borderRadius: 8, padding: "12px 16px", cursor: "pointer", color: "rgba(232,244,240,0.6)",
                       fontSize: 14, fontFamily: "Georgia, serif",
                     }}>
-                      🔄 Regenerate All
+                      {tr('regenerateAll', '🔄 Regenerate All')}
                     </button>
                   </div>
 
@@ -1343,7 +1343,7 @@ INSTRUCTIONS:
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                       }}
                     >
-                      📅 Add Appeal Deadline to Calendar
+                      {tr('addCalendar', '📅 Add Appeal Deadline to Calendar')}
                       <span style={{ fontSize: 12, fontWeight: 400, opacity: 0.7 }}>
                         ({confirmedExtraction.appeal_deadline})
                       </span>
@@ -1351,13 +1351,13 @@ INSTRUCTIONS:
                   )}
 
                   <div style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 10, padding: 14 }}>
-                    <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 8 }}>⚠️ AFTER SENDING YOUR LETTERS</div>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: "#ffd700", fontFamily: "monospace", marginBottom: 8 }}>{tr('afterSendingTitle', '⚠️ AFTER SENDING YOUR LETTERS')}</div>
                     <div style={{ fontSize: 12, lineHeight: 1.6, color: "rgba(232,244,240,0.7)", fontFamily: "monospace" }}>
-                      1. Send via certified mail AND fax — create a paper trail<br />
-                      2. Note the date — insurers have strict response deadlines<br />
-                      3. If denied again → request External Independent Review (free)<br />
-                      4. File a complaint with your State Insurance Commissioner<br />
-                      5. Last resort: contact your employer's HR / benefits dept (for group plans)
+                      1. {tr('afterSending1', 'Send via certified mail AND fax — create a paper trail')}<br />
+                      2. {tr('afterSending2', 'Note the date — insurers have strict response deadlines')}<br />
+                      3. {tr('afterSending3', 'If denied again → request External Independent Review (free)')}<br />
+                      4. {tr('afterSending4', 'File a complaint with your State Insurance Commissioner')}<br />
+                      5. {tr('afterSending5', "Last resort: contact your employer's HR / benefits dept (for group plans)")}
                     </div>
                   </div>
                 </>
@@ -1368,7 +1368,7 @@ INSTRUCTIONS:
                 borderRadius: 8, padding: "12px", cursor: "pointer", color: "rgba(232,244,240,0.4)",
                 fontSize: 13, fontFamily: "Georgia, serif",
               }}>
-                ← Start New Appeal
+                {tr('startNewAppeal', '← Start New Appeal')}
               </button>
             </Card>
           </div>
@@ -1377,7 +1377,7 @@ INSTRUCTIONS:
         <HeavyHittersFooter />
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "rgba(232,244,240,0.25)", fontFamily: "monospace", lineHeight: 1.8 }}>
-          healthcareadvocate.org — Not legal advice. Consult a healthcare attorney for complex cases.
+          {tr('footerDisclaimer', 'healthcareadvocate.org — Not legal advice. Consult a healthcare attorney for complex cases.')}
         </div>
       </div>
 
