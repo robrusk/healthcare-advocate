@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#00e5a0" />
+  <meta name="description" content="Healthcare Advocate privacy policy — exactly how we handle your data." />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+  <title>Your Privacy — Healthcare Advocate</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaf0;
+      --muted: #8892a4;
+      --teal: #00e5a0;
+      --red: #ff3c3c;
+      --yellow: #f5c842;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar a {
+      color: var(--teal);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .topbar a:hover { text-decoration: underline; }
+
+    .topbar-sep { color: var(--muted); font-size: 13px; }
+
+    .topbar-current { color: var(--muted); font-size: 13px; }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 56px 24px 0;
+    }
+
+    .shield {
+      font-size: 36px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .last-updated {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 40px;
+    }
+
+    /* ── Verdict card ── */
+    .verdict {
+      background: rgba(0, 229, 160, 0.07);
+      border: 1px solid rgba(0, 229, 160, 0.25);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+
+    .verdict-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--teal);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .verdict p {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── Content ── */
+    .content {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--teal);
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      margin-top: 28px;
+    }
+
+    h3:first-child { margin-top: 0; }
+
+    p {
+      color: var(--text);
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+
+    /* ── Data flow ── */
+    .flow {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 2;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .flow-icon { color: var(--teal); width: 18px; flex-shrink: 0; }
+    .flow-text { color: var(--text); }
+    .flow-note { color: var(--muted); font-size: 12px; }
+
+    .flow-arrow {
+      color: var(--muted);
+      padding-left: 6px;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
+    .callout-yellow {
+      background: rgba(245, 200, 66, 0.07);
+      border-left: 3px solid var(--yellow);
+    }
+
+    .callout-yellow .callout-label {
+      color: var(--yellow);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .callout-red {
+      background: rgba(255, 60, 60, 0.06);
+      border-left: 3px solid rgba(255,60,60,0.5);
+    }
+
+    .callout-red .callout-label {
+      color: #ff7070;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .callout p { margin-bottom: 0; }
+
+    /* ── HIPAA section ── */
+    .hipaa-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 16px 0;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 24px 48px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer-org {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-org a {
+      color: var(--teal);
+      text-decoration: none;
+    }
+
+    .footer-legal {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .hero { padding: 36px 16px 0; }
+      .content { padding: 0 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="/">🛡️ healthcareadvocate.org</a>
+    <span class="topbar-sep">›</span>
+    <span class="topbar-current">Your Privacy</span>
+  </div>
+
+  <div class="hero">
+    <div class="shield">🔒</div>
+    <h1>Your Privacy</h1>
+    <p class="hero-sub">We built this tool because families fighting the healthcare system shouldn't have to give up their privacy to get help.</p>
+    <p class="last-updated">Last updated: May 2026 — If we ever change how data flows through this tool, this page gets updated first.</p>
+
+    <div class="verdict">
+      <div class="verdict-label">The short version</div>
+      <p>If you close this browser tab, there is no record anywhere that you ever used this site. Not on our servers. Not in a database. Not in an analytics dashboard. Gone.</p>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- No accounts -->
+    <div class="section">
+      <h2>No Accounts. No Tracking. No Database.</h2>
+      <p>We don't ask you to sign up. We don't know who you are. We don't store anything on our servers between sessions. We have no database of users, documents, or activity.</p>
+    </div>
+
+    <!-- Data flow -->
+    <div class="section">
+      <h2>Where Your Document Goes</h2>
+      <p>When you upload a denial letter or medical bill, here is the complete path your document travels:</p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <span class="flow-icon">📱</span>
+          <span class="flow-text"><strong>Your browser</strong> — reads the file and converts it to a secure format in memory</span>
+        </div>
+        <div class="flow-arrow">↓ sent over HTTPS (encrypted)</div>
+        <div class="flow-step">
+          <span class="flow-icon">⚡</span>
+          <span class="flow-text"><strong>Our Cloudflare Worker</strong> — a stateless passthrough proxy</span>
+        </div>
+        <div class="flow-step">
+          <span class="flow-icon"></span>
+          <span class="flow-note">Receives the request and forwards it. No logging. No storage. Forgets it immediately.</span>
+        </div>
+        <div class="flow-arrow">↓ forwarded over HTTPS</div>
+        <div class="flow-step">
+          <span class="flow-icon">🤖</span>
+          <span class="flow-text"><strong>Anthropic's Claude AI</strong> — analyzes your document</span>
+        </div>
+        <div class="flow-arrow">↓ result returned</div>
+        <div class="flow-step">
+          <span class="flow-icon">📱</span>
+          <span class="flow-text"><strong>Your browser</strong> — displays the analysis</span>
+        </div>
+      </div>
+
+      <p>That is the entire path. Nothing is saved along the way. No files are uploaded to a storage bucket. No intermediate copies are created. The document lives in your browser's memory for the duration of your session and nowhere else.</p>
+    </div>
+
+    <!-- Anthropic -->
+    <div class="section">
+      <h2>Anthropic Does Not Train AI Models on Your Data</h2>
+      <p>Your document is processed by Anthropic's Claude AI. Per Anthropic's API terms:</p>
+      <ul style="list-style: none; padding: 0; margin: 16px 0;">
+        <li style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px;">✅ &nbsp;Your data is <strong>not</strong> used to train any AI model</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px;">✅ &nbsp;Your data is <strong>not</strong> retained for product improvement</li>
+        <li style="padding: 8px 0; font-size: 15px;">⚠️ &nbsp;Inputs <strong>may</strong> be held for up to 30 days for <em>automated</em> abuse monitoring — no human reviews your document unless it is specifically flagged by that automated system</li>
+      </ul>
+      <p>We are pursuing Anthropic's Zero Data Retention agreement as a nonprofit, which would eliminate even this window. We'll update this page when that's in place.</p>
+    </div>
+
+    <!-- Cloudflare -->
+    <div class="section">
+      <h2>Standard Hosting Metadata</h2>
+      <p>Like any website on the internet, Cloudflare (our hosting and CDN provider) records standard request metadata when you visit:</p>
+      <ul style="list-style: none; padding: 0; margin: 16px 0;">
+        <li style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px;">📋 &nbsp;Your IP address</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px;">🕐 &nbsp;The time of your visit</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px;">🔗 &nbsp;The URL you visited</li>
+        <li style="padding: 8px 0; font-size: 15px;">✅ &nbsp;<strong>Never</strong> the contents of your document</li>
+      </ul>
+      <p>This is standard CDN logging — the same metadata collected by every website you visit. Cloudflare uses it for infrastructure purposes (abuse prevention, traffic routing). We do not use it to identify users or analyze behavior.</p>
+    </div>
+
+    <!-- No trackers -->
+    <div class="section">
+      <h2>No Analytics. No Ad Networks. No Cookies From Us.</h2>
+      <p>We do not use Google Analytics, Facebook Pixel, or any other third-party tracking script. We don't have ads. We don't sell anything. There is nothing in the app that sends your browsing behavior anywhere.</p>
+      <p>Cloudflare may set infrastructure cookies (for bot detection and load balancing). These are set by Cloudflare's infrastructure — not by our application — and contain no personal information about you or your documents.</p>
+    </div>
+
+    <!-- Browser storage -->
+    <div class="section">
+      <h2>Nothing Saved in Your Browser Either</h2>
+      <p>Your uploaded document and the AI analysis live only in your browser's temporary session memory (React state). We do not save anything to localStorage, IndexedDB, or browser cookies. When you close the tab or navigate away, everything is cleared.</p>
+      <p>Your browser may cache the app itself (HTML, JavaScript, CSS) so it loads faster next time — but it never caches your documents or analysis results.</p>
+    </div>
+
+    <!-- Email callout -->
+    <div class="section">
+      <h2>One Exception: Email</h2>
+      <div class="callout callout-red">
+        <div class="callout-label">Important</div>
+        <p>If you email us at <strong>office@healthcareadvocate.org</strong>, that email is stored in our email system and read by a real person. Don't email us your denial letter or medical bill unless you want it kept on file. The app itself does not require you to email us anything — it works entirely without contact.</p>
+      </div>
+    </div>
+
+    <!-- HIPAA -->
+    <div class="section">
+      <h2>Are We HIPAA Compliant?</h2>
+      <div class="hipaa-box">
+        <p>HIPAA applies to health plans, healthcare providers, and their vendors — not to tools that patients use themselves. You can share your own health information with anyone you choose; HIPAA doesn't restrict that. We are a patient advocacy tool — you're using us to handle <em>your own</em> records, not giving a healthcare vendor access to them.</p>
+        <p>The honest answer — <em>HIPAA doesn't apply to us because we're patient-side, not provider-side</em> — is more accurate than a "HIPAA Compliant" badge. Most such badges in the AI healthcare space are marketing language, not legal conclusions.</p>
+        <p style="margin-bottom: 0;">That said, we designed this app to meet the same standards HIPAA would require: minimum necessary data, no retention, no secondary use. The architecture enforces it technically, not just by policy.</p>
+      </div>
+    </div>
+
+    <!-- Principles -->
+    <div class="section">
+      <h2>Our Commitment</h2>
+      <p>This is a volunteer project. We have no investors, no advertisers, and no revenue. There is no business model that benefits from your data. We are exploring nonprofit incorporation — the core commitment is already in place regardless: patients first, always. Free forever for the family. No advertising, no data selling, no conflicts of interest.</p>
+      <p>We will never sell your data. We will never use it to train AI. We will never monetize it in any form. If any of that ever changes — which would require amending our nonprofit charter — this page gets updated before the change takes effect.</p>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-org">
+      🛡️ Healthcare Advocate — <a href="/">healthcareadvocate.org</a> — <a href="mailto:office@healthcareadvocate.org">office@healthcareadvocate.org</a>
+    </div>
+    <div class="footer-legal">
+      This page describes how data flows through our application as of the date above. It is not a legal privacy policy in the formal regulatory sense — we are not subject to HIPAA, CCPA, or GDPR as currently structured, but we follow their spirit. If you have questions or concerns about your data, email us.
+      &nbsp;·&nbsp; <a href="/terms.html">Terms of Use</a>
+    </div>
+  </div>
+
+</body>
+</html>

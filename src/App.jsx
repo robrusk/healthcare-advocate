@@ -1289,6 +1289,9 @@ INSTRUCTIONS:
                           : tr('readInSpanish', '🌐 Leer en Español')}
                     </button>
                   </div>
+                  <p style={{ textAlign: 'center', fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,215,0,0.6)', margin: '0 0 14px' }}>
+                    ⚠️ Send the English version — / Envía la versión en inglés
+                  </p>
 
                   <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
                     <button
@@ -1400,6 +1403,9 @@ INSTRUCTIONS:
                           : tr('readInSpanish', '🌐 Leer en Español')}
                     </button>
                   </div>
+                  <p style={{ textAlign: 'center', fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,215,0,0.6)', margin: '0 0 14px' }}>
+                    ⚠️ Send the English version — / Envía la versión en inglés
+                  </p>
 
                   <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
                     <button onClick={copyLetter} style={{
@@ -1468,7 +1474,11 @@ INSTRUCTIONS:
         <HeavyHittersFooter />
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "rgba(232,244,240,0.25)", fontFamily: "monospace", lineHeight: 1.8 }}>
-          {tr('footerDisclaimer', 'healthcareadvocate.org — Not legal advice. Consult a healthcare attorney for complex cases.')}
+          {tr('footerDisclaimer', 'healthcareadvocate.org — Not legal advice. Consult a healthcare attorney for complex cases.')}<br />
+          For personal and family use only — not for professional use with client records.<br />
+          <a href="/privacy.html" style={{ color: "rgba(0,229,160,0.35)", textDecoration: "none" }}>Privacy</a>
+          {" · "}
+          <a href="/terms.html" style={{ color: "rgba(0,229,160,0.35)", textDecoration: "none" }}>Terms of Use</a>
         </div>
       </div>
 
