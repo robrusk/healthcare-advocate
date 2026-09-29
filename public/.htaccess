@@ -1,0 +1,20 @@
+# Cache rules for healthcareadvocate.org
+# Copied into dist/ by `npm run build` — upload it with the rest of dist/.
+#
+# Why: Cloudflare and phones were holding on to an old sw.js, so updates
+# didn't show up until the cache was purged. These rules make the files
+# that point to the current version always get re-checked, while the
+# versioned files in assets/ (their names change every build) can be
+# cached for a long time.
+
+<IfModule mod_headers.c>
+  # Always re-check: the service worker, its helpers, the manifest, and HTML pages
+  <FilesMatch "^(sw\.js|registerSW\.js|workbox-.*\.js|manifest\.webmanifest)$|\.html$">
+    Header set Cache-Control "no-cache, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  # Built JS/CSS have a unique name per build, so they never go stale
+  <If "%{REQUEST_URI} =~ m#^/assets/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+</IfModule>
