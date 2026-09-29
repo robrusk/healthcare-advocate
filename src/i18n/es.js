@@ -37,6 +37,20 @@ const es = {
   whyItalic: 'Creado por una persona real que ha pasado por esto. No es asesoramiento legal — pero es un verdadero punto de partida.',
   privacyLink: '🔒 Tu privacidad — cómo manejamos tus datos',
 
+  // Add to Home Screen
+  a2hsTitle: '📱 Pon esta app en tu teléfono',
+  a2hsBody: 'Agrega HealthcareAdvocate.org a tu pantalla de inicio. Tendrá su propio ícono y se abre con un toque, como cualquier app. Es gratis y no hay nada que descargar.',
+  a2hsIosHeading: 'iPhone o iPad',
+  a2hsIos1: 'Abre esta página en **Safari**.',
+  a2hsIos2: 'Toca el botón **Compartir** (el cuadro con una flecha hacia arriba).',
+  a2hsIos3: 'Desplázate hacia abajo y toca **Agregar a pantalla de inicio**.',
+  a2hsIos4: 'Toca **Agregar**.',
+  a2hsAndroidHeading: 'Android',
+  a2hsAndroid1: 'Abre esta página en **Chrome**.',
+  a2hsAndroid2: 'Toca los **tres puntos** en la esquina de arriba.',
+  a2hsAndroid3: 'Toca **Agregar a la pantalla principal** (o **Instalar app**).',
+  a2hsAndroid4: 'Toca **Agregar**.',
+
   // Form — who is submitting
   whoSubmittingDenial: '¿QUIÉN PRESENTA ESTA APELACIÓN?',
   whoHandlingBill: '¿QUIÉN SE ENCARGA DE ESTO?',

@@ -1473,6 +1473,8 @@ INSTRUCTIONS:
 
         <HeavyHittersFooter />
 
+        {step === "upload" && !photoSummary && !photoReading && <AddToHomeScreen tr={tr} />}
+
         <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "rgba(232,244,240,0.25)", fontFamily: "monospace", lineHeight: 1.8 }}>
           {tr('footerDisclaimer', 'healthcareadvocate.org — Not legal advice. Consult a healthcare attorney for complex cases.')}<br />
           For personal and family use only — not for professional use with client records.<br />
@@ -1559,6 +1561,57 @@ const STATE_COMMISSIONERS = {
   "Wisconsin": { phone: "1-800-236-8517", url: "https://oci.wi.gov/Pages/Consumers/FilingaComplaint.aspx" },
   "Wyoming": { phone: "1-800-438-5768", url: "https://doi.wyo.gov/consumers/file-a-complaint" },
 };
+
+// Renders **word** as bold so button names stand out in step-by-step instructions
+function boldSteps(text) {
+  return text.split("**").map((part, i) => (i % 2 ? <b key={i} style={{ color: "#e8f4f0" }}>{part}</b> : part));
+}
+
+function AddToHomeScreen({ tr }) {
+  // Already installed and opened from the Home Screen — nothing to show
+  const installed = typeof window !== "undefined" && (
+    window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches)
+  );
+  if (installed) return null;
+
+  const summaryStyle = { cursor: "pointer", fontWeight: 700, padding: "6px 0", color: "#00e5a0", fontSize: 14 };
+  const listStyle = { margin: "8px 0 0", paddingLeft: 22, fontSize: 13, lineHeight: 1.8, color: "rgba(232,244,240,0.7)" };
+
+  return (
+    <div style={{
+      marginTop: 32, background: "rgba(0,229,160,0.05)", border: "1px solid rgba(0,229,160,0.25)",
+      borderRadius: 12, padding: "18px 20px", fontFamily: "Georgia, serif", color: "#e8f4f0",
+    }}>
+      <h2 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800 }}>
+        {tr('a2hsTitle', '📱 Put this app on your phone')}
+      </h2>
+      <p style={{ margin: "0 0 12px", fontSize: 13, lineHeight: 1.6, color: "rgba(232,244,240,0.6)" }}>
+        {tr('a2hsBody', "Add HealthcareAdvocate.org to your Home Screen. It gets its own icon and opens with one tap, like any app. It's free, and nothing to download.")}
+      </p>
+
+      <details style={{ margin: "0 0 8px" }}>
+        <summary style={summaryStyle}>{tr('a2hsIosHeading', 'iPhone or iPad')}</summary>
+        <ol style={listStyle}>
+          <li>{boldSteps(tr('a2hsIos1', 'Open this page in **Safari**.'))}</li>
+          <li>{boldSteps(tr('a2hsIos2', 'Tap the **Share** button (the square with an arrow pointing up).'))}</li>
+          <li>{boldSteps(tr('a2hsIos3', 'Scroll down and tap **Add to Home Screen**.'))}</li>
+          <li>{boldSteps(tr('a2hsIos4', 'Tap **Add**.'))}</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary style={summaryStyle}>{tr('a2hsAndroidHeading', 'Android')}</summary>
+        <ol style={listStyle}>
+          <li>{boldSteps(tr('a2hsAndroid1', 'Open this page in **Chrome**.'))}</li>
+          <li>{boldSteps(tr('a2hsAndroid2', 'Tap the **three dots** in the top corner.'))}</li>
+          <li>{boldSteps(tr('a2hsAndroid3', 'Tap **Add to Home screen** (or **Install app**).'))}</li>
+          <li>{boldSteps(tr('a2hsAndroid4', 'Tap **Add**.'))}</li>
+        </ol>
+      </details>
+    </div>
+  );
+}
 
 function HeavyHittersFooter() {
   const [open, setOpen] = useState(false);
