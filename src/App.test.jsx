@@ -92,6 +92,31 @@ describe('App', () => {
     })
   })
 
+  it('Back button steps back through screens instead of leaving the site', async () => {
+    window.history.replaceState(null, '')
+    render(<App />)
+    await userEvent.upload(document.querySelector('input[type="file"]'), new File(['img'], 'd.jpg', { type: 'image/jpeg' }))
+    await userEvent.click(await screen.findByText('Not Medically Necessary'))
+    await userEvent.click(screen.getByText(/analyze my denial/i))
+    const box = await screen.findByLabelText(/anything else we should know/i, {}, { timeout: 4000 })
+    await userEvent.type(box, 'kept')
+
+    // Back from Battle Plan → the form, with what was filled in still there
+    window.history.back()
+    expect(await screen.findByText(/analyze my denial/i)).toBeInTheDocument()
+    expect(screen.getByText(/your claim was denied/i)).toBeInTheDocument()
+
+    // Forward again → Battle Plan, typed details kept
+    window.history.forward()
+    expect(await screen.findByLabelText(/anything else we should know/i)).toHaveValue('kept')
+
+    // Back twice → home screen
+    window.history.back()
+    await screen.findByText(/analyze my denial/i)
+    window.history.back()
+    expect(await screen.findByText(/fight a denial/i)).toBeInTheDocument()
+  })
+
   it('renders the submitter relationship selector after photo upload', async () => {
     render(<App />)
     const file = new File(['img'], 'denial.jpg', { type: 'image/jpeg' })

@@ -687,6 +687,49 @@ INSTRUCTIONS:
     setShowBillingTranslation(false);
   };
 
+  // BACK BUTTON
+  // Each screen gets a browser history entry, so the phone/browser Back button
+  // goes to the previous screen instead of leaving the site. Nothing typed is lost.
+  const screen = step === "upload" ? (photoSummary || photoReading ? "form" : "home") : step;
+  const latest = useRef({});
+  useEffect(() => {
+    latest.current = { photoSummary, photoReading, analysisResult, billExtraction, letters, generating, billingLetters, generatingBilling };
+  });
+
+  useEffect(() => {
+    if (screen === "analyze") return; // loading spinner, not a page to go back to
+    if (window.history.state?.screen === screen) return; // arrived here via Back/Forward
+    if (screen === "home" && !window.history.state?.screen) {
+      window.history.replaceState({ screen }, "");
+    } else {
+      window.history.pushState({ screen }, "");
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    const onPop = (e) => {
+      const target = e.state?.screen || "home";
+      const s = latest.current;
+      // Only go to a screen that still has what it needs to show; otherwise go home
+      const ready = {
+        form: s.photoSummary || s.photoReading,
+        strategy: s.analysisResult,
+        letter: s.letters.insurance || s.generating,
+        bill_review: s.billExtraction,
+        bill_letters: s.billingLetters.itemized_request || s.generatingBilling,
+      }[target];
+      if (target === "home" || !ready) {
+        reset();
+        window.history.replaceState({ screen: "home" }, "");
+      } else {
+        setStep(target === "form" ? "upload" : target);
+      }
+      try { window.scrollTo(0, 0); } catch { /* not available in tests */ }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
   return (
     <div style={{
       minHeight: "100vh",
