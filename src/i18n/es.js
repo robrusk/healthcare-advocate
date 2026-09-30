@@ -37,6 +37,11 @@ const es = {
   whyItalic: 'Creado por una persona real que ha pasado por esto. No es asesoramiento legal — pero es un verdadero punto de partida.',
   privacyLink: '🔒 Tu privacidad — cómo manejamos tus datos',
 
+  // "Anything else we should know?" box (confirm screens)
+  extraDetailsLabel: '¿Algo más que debamos saber? (opcional)',
+  extraDetailsHelp: 'Agrega datos que ayuden tu caso, como cuánto tiempo has usado un tratamiento, lo que dijo tu médico o lo que ya intentaste. No incluyas números de Seguro Social ni de banco.',
+  extraDetailsPlaceholder: 'Ejemplo: He tomado este medicamento por 6 años. Mi médico dice que el más barato me enfermó en 2023.',
+
   // Add to Home Screen
   a2hsTitle: '📱 Pon esta app en tu teléfono',
   a2hsBody: 'Agrega HealthcareAdvocate.org a tu pantalla de inicio. Tendrá su propio ícono y se abre con un toque, como cualquier app. Es gratis y no hay nada que descargar.',

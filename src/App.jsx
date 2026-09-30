@@ -47,6 +47,8 @@ import { buildLegalFramework, loadTemplate } from "./lib/planRoutes";
 import { lookupVerifiedFacts } from "./library/index";
 import { FactsUsedCard } from "./components/FactsUsedCard";
 import BillReviewScreen from "./components/BillReviewScreen";
+import ExtraDetailsBox from "./components/ExtraDetailsBox";
+import { buildExtraDetailsSection } from "./lib/extraDetails";
 import { downloadAppealReminder } from "./lib/calendar";
 import es from "./i18n/es";
 
@@ -286,6 +288,7 @@ export default function InsuranceFighter() {
   const tr = (key, english) => (lang === 'es' && es[key]) ? es[key] : english;
   const [denialText, setDenialText] = useState("");
   const [denialReason, setDenialReason] = useState("");
+  const [extraDetails, setExtraDetails] = useState("");
   const [submitterName, setSubmitterName] = useState("");
   const [submitterRelationship, setSubmitterRelationship] = useState("patient");
   const [submitterPhone, setSubmitterPhone] = useState("");
@@ -419,6 +422,7 @@ export default function InsuranceFighter() {
       .join('\n');
 
     const missingInfo = (billExtraction.missing_info || []).join(', ');
+    const extraSection = buildExtraDetailsSection(extraDetails);
 
     const itemizedPrompt = `You are a patient advocate. Write a firm, professional letter to the medical billing department requesting an itemized bill.
 
@@ -429,7 +433,7 @@ Bill Date: ${billExtraction.bill_date || "[BILL DATE]"}
 Total Billed: ${billExtraction.total_amount || "[TOTAL AMOUNT]"}
 Written by: ${signerName}
 ${flaggedItems ? `\nFlagged charges requiring clarification:\n${flaggedItems}` : ''}
-${missingInfo ? `\nMissing required information: ${missingInfo}` : ''}
+${missingInfo ? `\nMissing required information: ${missingInfo}` : ''}${extraSection}
 
 INSTRUCTIONS:
 1. Demand a complete itemized statement with CPT codes for every charge
@@ -447,7 +451,7 @@ Provider: ${providerName}
 Account Number: ${accountNumber}
 Patient: ${billExtraction.patient_name || "[PATIENT NAME]"}
 Error Description: ${billExtraction.biller_error_description || "The billing department submitted to the wrong insurance company or missed a filing deadline."}
-Written by: ${signerName}
+Written by: ${signerName}${extraSection}
 
 INSTRUCTIONS:
 1. Assert clearly that the patient provided correct insurance information at time of service
@@ -462,13 +466,13 @@ INSTRUCTIONS:
       const letterDraft = { itemized_request: '', biller_error_dispute: '' };
 
       const calls = [
-        callClaude({ model: "claude-opus-4-7", max_tokens: 800, messages: [{ role: "user", content: itemizedPrompt }] })
+        callClaude({ model: "claude-opus-4-7", max_tokens: 1500, messages: [{ role: "user", content: itemizedPrompt }] })
           .then(r => { letterDraft.itemized_request = r.content.find(b => b.type === "text")?.text || "" }),
       ];
 
       if (billExtraction.biller_error_detected) {
         calls.push(
-          callClaude({ model: "claude-opus-4-7", max_tokens: 800, messages: [{ role: "user", content: billerErrorPrompt }] })
+          callClaude({ model: "claude-opus-4-7", max_tokens: 1500, messages: [{ role: "user", content: billerErrorPrompt }] })
             .then(r => { letterDraft.biller_error_dispute = r.content.find(b => b.type === "text")?.text || "" })
         );
       }
@@ -541,7 +545,7 @@ Claim Number: ${claimNumber || "[CLAIM NUMBER]"}
 Insurance Company: ${resolvedInsurer}
 Treatment/Service: ${resolvedService}
 Denial Reason: ${resolvedDenialReason}${resolvedDeadline ? `\nAppeal Deadline: ${resolvedDeadline}` : ""}${resolvedState ? `\nState: ${resolvedState}` : ""}
-Written by: ${signerName} (${relationshipLabel})`;
+Written by: ${signerName} (${relationshipLabel})${buildExtraDetailsSection(extraDetails)}`;
 
     const templateSection = template
       ? `VETTED APPEAL TEMPLATE — adapt this structure. Fill in placeholders with the case facts above. Do not deviate from the legal framework it establishes.\n\n${template}`
@@ -601,7 +605,7 @@ INSTRUCTIONS:
 
     const call = (prompt) => callClaude({
       model: "claude-opus-4-7",
-      max_tokens: 1000,
+      max_tokens: 2000,
       messages: [{ role: "user", content: prompt }],
     }).then((r) => r.content.find((b) => b.type === "text")?.text || "");
 
@@ -630,7 +634,7 @@ INSTRUCTIONS:
     try {
       const result = await callClaude({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1200,
+        max_tokens: 2500,
         messages: [{
           role: 'user',
           content: `Translate this appeal letter to Spanish. Preserve all names, dates, claim numbers, dollar amounts, and legal citations exactly as written. Write only the translated letter — no preamble.\n\n${text}`,
@@ -646,6 +650,7 @@ INSTRUCTIONS:
   const reset = () => {
     setStep("upload");
     setDenialText("");
+    setExtraDetails("");
     setDenialReason("");
     setPatientName("");
     setClaimNumber("");
@@ -1042,7 +1047,9 @@ INSTRUCTIONS:
               onGenerate={generateBillingLetters}
               onSwitch={() => { setDocumentType('denial_letter'); setStep('upload'); }}
               lang={lang}
-            />
+            >
+              <ExtraDetailsBox value={extraDetails} onChange={setExtraDetails} lang={lang} />
+            </BillReviewScreen>
           </div>
         )}
 
@@ -1184,6 +1191,8 @@ INSTRUCTIONS:
                   </div>
                 ))}
               </div>
+
+              <ExtraDetailsBox value={extraDetails} onChange={setExtraDetails} lang={lang} />
 
               <button
                 onClick={generateLetter}

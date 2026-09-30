@@ -55,6 +55,43 @@ describe('App', () => {
     })
   })
 
+  describe('Anything else we should know? box', () => {
+    // Walk the denial flow to the confirm screen, optionally type extra details,
+    // click Draft, and return the prompts sent for the three letters.
+    async function draftLetters(extra) {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'LETTER' }] }),
+      })
+      vi.stubGlobal('fetch', fetchMock)
+      render(<App />)
+      await userEvent.upload(document.querySelector('input[type="file"]'), new File(['img'], 'd.jpg', { type: 'image/jpeg' }))
+      await userEvent.click(await screen.findByText('Not Medically Necessary'))
+      await userEvent.click(screen.getByText(/analyze my denial/i))
+      const box = await screen.findByLabelText(/anything else we should know/i, {}, { timeout: 4000 })
+      if (extra) await userEvent.type(box, extra)
+      await userEvent.click(screen.getByText(/draft my appeal/i))
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
+      vi.unstubAllGlobals()
+      return fetchMock.mock.calls.map(([, init]) => JSON.parse(init.body).messages[0].content)
+    }
+
+    it('adds the typed details to all three letter prompts', async () => {
+      const prompts = await draftLetters("I've taken this medicine for 6 years.")
+      expect(prompts).toHaveLength(3)
+      for (const p of prompts) {
+        expect(p).toContain("<patient_added_details>\nI've taken this medicine for 6 years.\n</patient_added_details>")
+        expect(p).toContain('Never invent dates, doctors, test results, or medical history')
+      }
+    })
+
+    it('leaves the letters unchanged when the box is empty', async () => {
+      const prompts = await draftLetters('')
+      expect(prompts).toHaveLength(3)
+      for (const p of prompts) expect(p).not.toContain('patient_added_details')
+    })
+  })
+
   it('renders the submitter relationship selector after photo upload', async () => {
     render(<App />)
     const file = new File(['img'], 'denial.jpg', { type: 'image/jpeg' })

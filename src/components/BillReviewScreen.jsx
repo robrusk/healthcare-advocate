@@ -1,6 +1,6 @@
 import es from '../i18n/es'
 
-export default function BillReviewScreen({ bill, onGenerate, onSwitch, lang = 'en' }) {
+export default function BillReviewScreen({ bill, onGenerate, onSwitch, lang = 'en', children }) {
   const tr = (key, english) => (lang === 'es' && es[key]) ? es[key] : english
   const FLAG_LABELS = {
     missing_code: { icon: '⚠', label: tr('flagMissingCode', 'No billing code'), color: '#ffd700' },
@@ -130,6 +130,9 @@ export default function BillReviewScreen({ bill, onGenerate, onSwitch, lang = 'e
           ))}
         </div>
       )}
+
+      {/* Optional extra details box (passed in from App) */}
+      {children}
 
       {/* Generate Button */}
       <button
