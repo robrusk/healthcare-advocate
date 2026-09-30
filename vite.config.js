@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json' with { type: 'json' }
+
+// Shown in the footer. Bump "version" in package.json: 1.50.0 → "v1.50", 1.50.1 → "v1.50.1"
+const APP_VERSION = 'v' + pkg.version.replace(/\.0$/, '')
 
 export default defineConfig({
   base: '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
+  },
   build: {
     cssMinify: 'esbuild',
   },

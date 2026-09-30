@@ -1533,6 +1533,9 @@ INSTRUCTIONS:
           <a href="/privacy.html" style={{ color: "rgba(0,229,160,0.35)", textDecoration: "none" }}>Privacy</a>
           {" · "}
           <a href="/terms.html" style={{ color: "rgba(0,229,160,0.35)", textDecoration: "none" }}>Terms of Use</a>
+          {" · "}
+          <span>{__APP_VERSION__}</span><br />
+          © 2025–2026 healthcareadvocate.org
         </div>
       </div>
 

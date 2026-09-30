@@ -40,6 +40,16 @@ describe('App', () => {
     expect(screen.getByText(/review a bill/i)).toBeInTheDocument()
   })
 
+  it('shows the version number in the footer', () => {
+    render(<App />)
+    expect(screen.getByText('v1.50')).toBeInTheDocument()
+  })
+
+  it('shows the copyright line in the footer', () => {
+    render(<App />)
+    expect(screen.getByText(/© 2025–2026 healthcareadvocate\.org/)).toBeInTheDocument()
+  })
+
   it('renders the not-sure fallback link', () => {
     render(<App />)
     expect(screen.getByText(/not sure what you have/i)).toBeInTheDocument()
